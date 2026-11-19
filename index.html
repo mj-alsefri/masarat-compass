@@ -1,0 +1,1008 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>بوصلة التطوع</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Changa:wght@600;700&family=Readex+Pro:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+/* Masarat = "paths". The page is built on one motif: a trail with stations.
+   It carries progress, the role list, and the section breaks. Navy is the
+   bold surface and holds the compass; the questions sit on light paper. */
+:root{
+  --ink:#0e2a3c;        /* navy, from the logo blue pushed down */
+  --ink-2:#17405a;      /* raised navy, for fields on navy */
+  --blue:#3c8bb7;       /* logo blue */
+  --blue-deep:#256388;  /* logo blue, for text and buttons on paper */
+  --amber:#f3ab0d;      /* logo amber */
+  --paper:#edf2f5;
+  --line:#cbd9e2;
+  --graphite:#55606a;
+  --sand:#fbeed0;
+  --warn:#a8450a;
+  --d:"Changa","Readex Pro",system-ui,sans-serif;
+  --b:"Readex Pro","Segoe UI",Tahoma,Arial,sans-serif;
+  color-scheme:light;
+}
+*{box-sizing:border-box}
+html,body{height:100%;margin:0}
+body{background:var(--paper);color:var(--ink);font-family:var(--b);font-weight:400;font-size:16.5px;line-height:1.75;
+  -webkit-text-size-adjust:100%;transition:background-color .35s ease}
+body[data-screen="welcome"],body[data-screen="result"]{background:var(--ink);color:#fff}
+button{font:inherit;color:inherit;cursor:pointer}
+a{color:var(--blue-deep)}
+:focus-visible{outline:3px solid var(--amber);outline-offset:3px}
+h1,h2,h3{font-family:var(--d);font-weight:700;margin:0;line-height:1.3;text-wrap:balance}
+p{margin:0}
+.wrap{max-width:672px;margin:0 auto;padding:0 18px 44px;min-height:100%;display:flex;flex-direction:column}
+
+/* masthead */
+.top{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:16px 0 8px}
+.top .brand{display:flex;align-items:center;gap:11px;font-family:var(--d);font-weight:700;font-size:18px}
+.top .brand svg{width:70px;height:32px;display:block}
+.top .restart{background:none;border:1px solid var(--line);border-radius:999px;padding:5px 15px;font-size:14px;color:var(--graphite)}
+.top .restart:hover{border-color:var(--blue-deep);color:var(--blue-deep)}
+body[data-screen="result"] .top .restart{border-color:rgba(255,255,255,.3);color:#cfe0ea}
+body[data-screen="result"] .top .restart:hover{border-color:var(--amber);color:var(--amber)}
+
+/* the trail: three stations, the rail fills with progress */
+.trail{position:relative;height:36px;margin:16px 0 30px}
+.trail .rail{position:absolute;top:5px;right:0;left:0;height:2px;background:var(--line);border-radius:2px}
+.trail .rail i{position:absolute;top:0;right:0;height:100%;background:var(--amber);border-radius:2px;transition:width .35s ease}
+.trail b{position:absolute;top:0;width:12px;height:12px;border-radius:50%;background:var(--paper);border:2px solid var(--line)}
+.trail b.done{background:var(--amber);border-color:var(--amber)}
+.trail b.now{background:#fff;border-color:var(--amber);box-shadow:0 0 0 4px rgba(243,171,13,.2)}
+.trail .name{position:absolute;top:19px;font-size:13px;white-space:nowrap;color:var(--graphite);font-weight:300}
+.trail .name.on{color:var(--ink);font-weight:500}
+
+/* ---------- welcome ---------- */
+.hero{display:grid;gap:21px;padding-top:6px}
+.hero .who{display:grid;gap:3px}
+.hero .who svg{width:96px;height:44px}
+.hero .who span{font-size:14.5px;color:#a9c3d3;font-weight:300}
+.hero h1{font-family:var(--d);font-size:clamp(37px,10.2vw,58px);line-height:1.1;color:#fff;letter-spacing:-.01em}
+.hero p{font-size:17.5px;color:#d3e2eb;font-weight:300;max-width:27em;line-height:1.65}
+.hero .rose{display:block;width:100%;height:auto;max-height:min(33vh,246px)}
+.hero .where{font-size:13.5px;color:#8fb0c4;font-weight:300;line-height:1.65}
+.go{display:inline-flex;align-items:center;justify-content:center;background:var(--amber);color:#10293a;border:0;
+  border-radius:16px;padding:15px 34px;font-family:var(--d);font-size:22px;font-weight:700;min-height:60px;width:100%}
+.go:hover{background:#ffbe30}
+.go[disabled]{background:#8aa3b3;color:#e8f0f5;cursor:not-allowed}
+.go.quiet{background:none;color:#cfe0ea;border:1.5px solid rgba(255,255,255,.3);font-size:18px;min-height:52px;padding:10px 24px;width:auto}
+.go.quiet:hover{border-color:var(--amber);color:var(--amber);background:none}
+
+/* ---------- question screens ---------- */
+.screen{display:grid;gap:24px}
+.screen.one{min-height:calc(100vh - 216px);align-content:center}
+@supports (height:100dvh){.screen.one{min-height:calc(100dvh - 216px)}}
+.screen h2{font-size:27px}
+.screen .lead{color:var(--graphite);font-size:16px;margin-top:-16px;font-weight:300}
+fieldset{border:0;padding:0;margin:0;display:grid;gap:11px;min-width:0}
+legend{padding:0;font-family:var(--d);font-weight:600;font-size:19px;margin-bottom:9px;color:var(--ink)}
+legend em{font-style:normal;font-family:var(--b);font-weight:300;color:var(--graphite);font-size:14.5px}
+.pick{display:flex;flex-wrap:wrap;gap:9px}
+.pick.rows{display:grid}
+.pick.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr))}
+.pick button{background:#fff;border:1.5px solid var(--line);border-radius:13px;padding:11px 16px;min-height:50px;
+  text-align:start;line-height:1.5;font-size:16px;transition:border-color .15s,background-color .15s}
+.pick button:hover{border-color:var(--blue)}
+.pick button small{display:block;font-size:13.5px;color:var(--graphite);font-weight:300}
+.pick button[aria-pressed="true"]{background:var(--ink);border-color:var(--ink);color:#fff}
+.pick button[aria-disabled="true"]{opacity:.42}
+.pick button[aria-disabled="true"]:hover{border-color:var(--line)}
+.pick button[aria-pressed="true"] small{color:#b9cedb}
+.nav{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-top:4px}
+.back{background:none;border:0;padding:8px 2px;color:var(--graphite);font-size:15.5px;text-decoration:underline;
+  text-underline-offset:4px;min-height:44px}
+.back:hover{color:var(--blue-deep)}
+.next{background:var(--ink);color:#fff;border:0;border-radius:14px;padding:12px 30px;font-family:var(--d);
+  font-size:19px;font-weight:600;min-height:54px}
+.next:hover{background:#1c4a66}
+.next[disabled]{background:#b4c5d1;cursor:not-allowed}
+.next.lit{background:var(--amber);color:#10293a}
+.next.lit:hover{background:#ffbe30}
+
+/* the bearing dial */
+.count{font-size:14px;color:var(--graphite);font-variant-numeric:tabular-nums;font-weight:300}
+.statement{font-family:var(--d);font-weight:600;font-size:clamp(26px,6.6vw,35px);line-height:1.45;min-height:2.9em}
+.dial{display:grid;gap:10px}
+.dial .stops{display:flex;align-items:center;justify-content:space-between;gap:6px}
+.dial button{border-radius:50%;border:1.5px solid var(--line);background:#fff;display:grid;place-items:center;
+  font-family:var(--d);font-weight:600;font-size:19px;color:var(--graphite);flex:none;
+  transition:transform .12s,background-color .15s,border-color .15s,color .15s}
+.dial button[data-val="1"],.dial button[data-val="5"]{width:60px;height:60px}
+.dial button[data-val="2"],.dial button[data-val="4"]{width:53px;height:53px}
+.dial button[data-val="3"]{width:46px;height:46px;font-size:17px}
+.dial button:hover{border-color:var(--blue);color:var(--blue-deep)}
+.dial button[aria-pressed="true"]{background:var(--amber);border-color:var(--amber);color:#10293a;transform:scale(1.06)}
+.dial .ends{display:flex;justify-content:space-between;font-size:12.5px;color:var(--graphite);font-weight:300}
+.dial .ends span:nth-child(2){text-align:center}
+.dial .ends span:last-child{text-align:end}
+
+/* contact step */
+.field{display:grid;gap:7px}
+.field label{font-weight:500;font-size:16.5px}
+.field input{font:inherit;padding:13px 15px;border:1.5px solid var(--line);border-radius:13px;background:#fff;
+  color:var(--ink);min-height:54px;width:100%}
+.field input:focus{border-color:var(--blue)}
+.field input.tel{direction:ltr;text-align:right}
+.field .bad{color:var(--warn);font-size:14.5px}
+.consent{font-size:14.5px;color:var(--graphite);font-weight:300}
+
+/* ---------- result ---------- */
+.result{display:grid;gap:26px;padding-top:6px}
+.bearing{display:grid;gap:14px}
+.bearing .lead{color:#a9c3d3;font-size:15px;font-weight:300}
+.bearing h2{font-family:var(--d);font-size:clamp(38px,10.5vw,56px);line-height:1.12;color:var(--amber)}
+.bearing h2 span{color:#fff}
+.bearing .says{font-size:18px;color:#d3e2eb;font-weight:300;max-width:28em}
+.bearing .rose{display:block;width:100%;height:auto;max-height:340px;margin:2px 0}
+.bearing .level{border-top:1px solid rgba(255,255,255,.17);padding-top:15px;display:grid;gap:3px}
+.bearing .level b{font-family:var(--d);font-size:22px;color:var(--amber);font-weight:700}
+.bearing .level span{color:#bed3df;font-size:15.5px;font-weight:300}
+.needle{transition:transform 1.4s cubic-bezier(.32,1.4,.5,1);transform-origin:0 0}
+
+.panel{background:var(--paper);color:var(--ink);border-radius:26px;padding:24px 20px;display:grid;gap:26px}
+.panel h3{font-size:22px}
+.panel .sub{color:var(--graphite);font-size:14.5px;font-weight:300;margin-top:-10px}
+/* roles as stations on a trail */
+.roles{list-style:none;margin:14px 0 0;padding:0 20px 0 0;position:relative;display:grid;gap:20px}
+.roles::before{content:"";position:absolute;top:8px;bottom:8px;right:4px;width:2px;background:#b7ccd9}
+.roles li{position:relative;display:grid;gap:3px}
+.roles li::before{content:"";position:absolute;top:7px;right:-20px;width:10px;height:10px;border-radius:50%;
+  background:var(--amber);box-shadow:0 0 0 4px var(--paper)}
+.roles .t{font-family:var(--d);font-weight:600;font-size:19px;line-height:1.4}
+.roles .s{font-size:15px;color:var(--ink);font-weight:300;line-height:1.6}
+.roles .meta{font-size:13.5px;color:var(--graphite);font-weight:300}
+.gap{font-size:14px;color:var(--graphite);font-weight:300;border-top:1px solid var(--line);padding-top:12px}
+.tip{background:var(--sand);border-radius:18px;padding:17px 19px;display:grid;gap:7px}
+.tip h3{font-size:19px}
+.tip p{font-size:15.5px;font-weight:300}
+.reg{display:grid;gap:13px}
+.reg .row{display:grid;grid-template-columns:1fr auto;gap:15px;align-items:center;border:1.5px solid var(--line);
+  border-radius:18px;padding:15px}
+.reg .row.first{border-color:var(--blue-deep)}
+.reg .row h4{margin:0;font-family:var(--d);font-weight:600;font-size:18px}
+.reg .row p{font-size:14.5px;color:var(--graphite);font-weight:300;margin:4px 0 11px}
+.reg .row a{display:inline-flex;align-items:center;justify-content:center;background:var(--blue-deep);color:#fff;
+  border-radius:12px;padding:10px 22px;min-height:48px;font-family:var(--d);font-weight:600;font-size:17px;text-decoration:none}
+.reg .row a:hover{background:var(--ink)}
+.reg .row.second a{background:none;color:var(--blue-deep);border:1.5px solid var(--line)}
+.reg .row.second a:hover{background:var(--blue-deep);color:#fff;border-color:var(--blue-deep)}
+.reg svg{width:98px;height:98px;display:block;background:#fff;border-radius:6px}
+.close{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap}
+.close svg{width:118px;height:76px}
+.fine{font-size:12.5px;color:#8fb0c4;font-weight:300;line-height:1.8}
+
+/* ---------- report ---------- */
+.report{display:grid;gap:20px}
+.report h2{font-size:26px}
+.scopes{display:flex;flex-wrap:wrap;gap:8px}
+.scopes button{background:#fff;border:1.5px solid var(--line);border-radius:999px;padding:8px 17px;min-height:44px;font-size:15px}
+.scopes button[aria-pressed="true"]{background:var(--ink);border-color:var(--ink);color:#fff}
+.range{display:flex;flex-wrap:wrap;gap:12px}
+.range .field{flex:1 1 150px}
+.range input{min-height:46px;padding:9px 12px}
+.tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(132px,1fr));gap:1px;background:var(--line);
+  border:1px solid var(--line);border-radius:16px;overflow:hidden}
+.tile{background:var(--paper);padding:13px 16px}
+.tile b{display:block;font-family:var(--d);font-size:30px;font-variant-numeric:tabular-nums;line-height:1.25}
+.tile span{font-size:13px;color:var(--graphite);font-weight:300}
+.chart{display:grid;gap:9px}
+.chart h3{font-size:18px}
+.bar{display:grid;grid-template-columns:minmax(94px,32%) 1fr 66px;gap:10px;align-items:center;font-size:14.5px;font-weight:300}
+.bar .track{height:12px;background:#fff;border:1px solid var(--line);border-radius:7px;overflow:hidden}
+.bar .track i{display:block;height:100%;background:var(--blue)}
+.bar .n{font-variant-numeric:tabular-nums;color:var(--graphite);text-align:end;font-size:13.5px}
+.export{border:1.5px solid var(--line);border-radius:18px;padding:18px;display:grid;gap:13px}
+.export .btns{display:flex;flex-wrap:wrap;gap:10px}
+.export button{background:var(--ink);color:#fff;border:0;border-radius:12px;padding:10px 20px;min-height:48px;
+  font-family:var(--d);font-weight:600;font-size:16px}
+.export button:hover{background:#1c4a66}
+.export button[disabled]{background:#b4c5d1;cursor:not-allowed}
+.export button.alt{background:none;color:var(--blue-deep);border:1.5px solid var(--line);font-family:var(--b);font-weight:400}
+.export button.alt:hover{background:#fff;border-color:var(--blue-deep)}
+.said{font-size:14.5px;color:var(--graphite);font-weight:300}
+.said.warn{color:var(--warn)}
+.notice{background:var(--sand);border-radius:14px;padding:13px 16px;font-size:15px;font-weight:300}
+
+.shelf{margin-top:auto;padding-top:28px;font-size:13.5px;color:var(--graphite);display:flex;flex-wrap:wrap;
+  gap:6px 14px;align-items:center;font-weight:300}
+.shelf .live{display:inline-block;width:9px;height:9px;border-radius:50%;background:#1f8a5b;margin-inline-end:7px}
+.shelf .live.hold{background:var(--amber)}
+.shelf button{background:none;border:0;padding:0;color:var(--blue-deep);text-decoration:underline;
+  text-underline-offset:3px;font-size:13.5px}
+body[data-screen="welcome"] .shelf,body[data-screen="result"] .shelf{color:#8fb0c4}
+body[data-screen="welcome"] .shelf button,body[data-screen="result"] .shelf button{color:#cfe0ea}
+
+@media (min-width:600px){
+  .roles{padding-inline-end:24px}
+  .go{width:auto}
+}
+@media (max-width:430px){.reg .row{grid-template-columns:1fr}.reg svg{display:none}}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+</head>
+<body data-screen="welcome">
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
+<g>
+<g id="lg-0-0">
+<path d="M 11.64 -29.19 L 15.03 -25.7 L 19.36 -30.36 L 14.95 -34.95 L 11.64 -31.52 L 8.28 -34.95 L 3.91 -30.36 L 8.33 -25.7 Z M 24.67 -7.38 C 23.14 -7.38 22.3 -8.19 22.3 -10.14 L 22.25 -25.03 L 15.62 -24.19 L 15.62 -21.77 C 14.09 -22.31 12.73 -22.62 11.34 -22.62 C 5.31 -22.62 1.02 -17.2 1.02 -10.86 C 1.02 -4.52 5.31 0.41 11.34 0.41 C 13.67 0.41 15.92 -0.27 18.47 -1.66 C 19.95 -0.53 22 0 24.67 0 C 24.92 0 25.09 -0.22 25.09 -0.48 L 25.09 -6.92 C 25.09 -7.2 24.92 -7.38 24.67 -7.38 Z M 11.34 -6.48 C 8.92 -6.58 7.17 -8.5 7.17 -11 C 7.17 -13.77 8.95 -15.73 11.67 -15.73 C 13 -15.73 14.27 -15.42 15.62 -14.94 L 15.67 -9.17 C 15.67 -8.5 15.67 -7.83 15.75 -7.23 C 14.44 -6.7 12.91 -6.44 11.34 -6.48 Z M 11.34 -6.48 "/>
+</g>
+<g id="lg-0-1">
+<path d="M 16.44 -7.38 C 14.78 -7.38 13.17 -7.88 11.77 -8.81 L 11.77 -18.11 L 5.14 -17.3 L 5.19 -11.94 C 5.19 -8.72 3.39 -7.38 0.08 -7.38 C -0.17 -7.38 -0.34 -7.2 -0.34 -6.92 L -0.42 -0.48 C -0.42 -0.22 -0.25 0 0 0 C 4.45 0 7.81 -1.12 9.77 -3.36 C 11.77 -1.2 14.19 0 16.44 0 C 16.69 0 16.86 -0.22 16.86 -0.48 L 16.86 -6.92 C 16.86 -7.2 16.69 -7.38 16.44 -7.38 Z M 8.23 5.45 L 5.14 2.28 L 0.77 6.89 L 5.22 11.48 L 8.23 8.31 L 11.34 11.48 L 15.72 6.89 L 11.25 2.28 Z M 8.23 5.45 "/>
+</g>
+<g id="lg-0-2">
+<path d="M 0 0 C 6.84 0 10.19 -3.22 10.19 -9.39 L 10.19 -22.67 L 3.56 -21.81 L 3.61 -11.94 C 3.61 -8.77 2.47 -7.38 0.08 -7.38 C -0.17 -7.38 -0.34 -7.2 -0.34 -6.92 L -0.42 -0.48 C -0.42 -0.22 -0.25 0 0 0 Z M 5.14 11.58 L 9.52 6.97 L 5.09 2.38 L 0.67 6.97 Z M 5.14 11.58 "/>
+</g>
+<g id="lg-0-3">
+<path d="M 13.38 0 C 13.62 0 13.8 -0.22 13.8 -0.48 L 13.77 -6.92 C 13.77 -7.2 13.59 -7.38 13.33 -7.38 C 10.92 -7.38 9.81 -8.81 9.81 -11.98 L 9.77 -32.64 L 3.14 -31.83 L 3.19 -9.48 C 3.19 -3.17 6.55 0 13.38 0 Z M 13.38 0 "/>
+</g>
+<g id="lg-0-4">
+<path d="M 14.66 -7.38 C 12.88 -7.38 11.47 -7.88 10.19 -8.67 L 10.19 -18.11 L 3.56 -17.3 L 3.61 -11.94 C 3.61 -8.77 2.47 -7.38 0.08 -7.38 C -0.17 -7.38 -0.34 -7.2 -0.34 -6.92 L -0.42 -0.48 C -0.42 -0.22 -0.25 0 0 0 C 3.73 0 6.45 -0.98 8.16 -2.86 C 9.89 -1.03 12.14 0 14.66 0 C 14.91 0 15.08 -0.22 15.08 -0.48 L 15.08 -6.92 C 15.08 -7.2 14.91 -7.38 14.66 -7.38 Z M 2.8 7.02 L 7.27 11.62 L 11.64 7.02 L 7.22 2.41 Z M 2.8 7.02 "/>
+</g>
+<g id="lg-0-5">
+<path d="M 22.84 -33.53 L 19.95 -36.52 L 17.2 -33.53 L 20 -30.53 Z M 19.95 -26.06 L 23.36 -22.58 L 27.69 -27.22 L 23.27 -31.83 L 19.95 -28.39 L 16.61 -31.83 L 12.23 -27.22 L 16.64 -22.58 Z M 40.3 -7.38 C 38.91 -7.38 37.72 -7.64 36.69 -8.19 C 36.69 -8.58 36.73 -8.98 36.73 -9.39 L 36.73 -22.67 L 30.11 -21.86 L 30.11 -11.94 C 30.11 -8.94 28.88 -7.38 26.58 -7.38 C 25.39 -7.38 24.38 -7.56 23.31 -7.91 C 23.36 -8.41 23.41 -8.89 23.41 -9.39 L 23.41 -18.11 L 16.78 -17.3 L 16.81 -11.94 C 16.81 -8.77 15.67 -7.38 13.25 -7.38 C 12.14 -7.38 11.12 -7.59 10.06 -8.05 C 10.11 -8.5 10.16 -8.94 10.16 -9.39 L 10.16 -18.11 L 3.48 -17.3 L 3.53 -11.94 C 3.53 -8.77 2.38 -7.38 0 -7.38 C -0.25 -7.38 -0.42 -7.2 -0.42 -6.92 L -0.42 -0.48 C -0.42 -0.22 -0.25 0 0 0 C 3.39 0 5.95 -0.94 7.64 -2.64 C 9.72 -0.84 11.81 0 13.94 0 C 16.78 0 19.11 -0.94 20.77 -2.5 C 23.14 -0.8 25.44 0 27.81 0 C 30.66 0 32.88 -0.8 34.36 -2.28 C 36.02 -0.8 38.02 0 40.3 0 C 40.56 0 40.73 -0.22 40.73 -0.48 L 40.73 -6.92 C 40.73 -7.2 40.56 -7.38 40.3 -7.38 Z M 40.3 -7.38 "/>
+</g>
+<g id="lg-0-6">
+<path d="M 0 0 C 6.84 0 10.19 -3.17 10.19 -9.48 L 10.23 -32.64 L 3.61 -31.83 L 3.56 -11.98 C 3.56 -8.81 2.47 -7.38 0.05 -7.38 C -0.22 -7.38 -0.38 -7.2 -0.38 -6.92 L -0.42 -0.48 C -0.42 -0.22 -0.25 0 0 0 Z M 0 0 "/>
+</g>
+<g id="lg-0-7">
+<path d="M 2.84 0 L 9.47 0 L 9.47 -32.64 L 2.84 -31.83 Z M 2.84 0 "/>
+</g>
+<g id="lg-0-8">
+</g>
+<g id="lg-0-9">
+<path d="M 16.64 -23.61 L 20.05 -20.11 L 24.38 -24.77 L 19.95 -29.38 L 16.64 -25.92 L 13.3 -29.38 L 8.92 -24.77 L 13.33 -20.11 Z M 26.12 -21.81 L 26.16 -11.94 C 26.16 -8.77 25.02 -7.38 22.59 -7.38 L 13.33 -7.38 C 9.09 -7.38 7.17 -8.84 7.17 -12.25 C 7.17 -13.19 7.3 -14.53 7.61 -16.62 L 1.91 -17.34 C 1.31 -14.48 1.11 -11.8 1.11 -10.11 C 1.11 -3.36 4.67 0 11.67 0 L 22.81 0 C 29.44 -0.09 32.75 -3.31 32.75 -9.39 L 32.75 -22.67 Z M 26.12 -21.81 "/>
+</g>
+<g id="lg-0-10">
+<path d="M -0.17 9.61 C 7.94 9.61 11.89 6.7 11.89 -1.03 L 11.89 -22.67 L 5.27 -21.81 L 5.31 -1.34 C 5.31 2.5 2.8 3.94 -0.64 3.94 Z M -0.17 9.61 "/>
+</g>
+<g id="lg-0-11">
+<path d="M 40.3 -7.38 C 38.91 -7.38 37.72 -7.64 36.69 -8.19 C 36.69 -8.58 36.73 -8.98 36.73 -9.39 L 36.73 -22.67 L 30.11 -21.86 L 30.11 -11.94 C 30.11 -8.94 28.88 -7.38 26.58 -7.38 C 25.39 -7.38 24.38 -7.56 23.31 -7.91 C 23.36 -8.41 23.41 -8.89 23.41 -9.39 L 23.41 -18.11 L 16.78 -17.3 L 16.81 -11.94 C 16.81 -8.77 15.67 -7.38 13.25 -7.38 C 12.14 -7.38 11.12 -7.59 10.06 -8.05 C 10.11 -8.5 10.16 -8.94 10.16 -9.39 L 10.16 -18.11 L 3.48 -17.3 L 3.53 -11.94 C 3.53 -8.77 2.38 -7.38 0 -7.38 C -0.25 -7.38 -0.42 -7.2 -0.42 -6.92 L -0.42 -0.48 C -0.42 -0.22 -0.25 0 0 0 C 3.39 0 5.95 -0.94 7.64 -2.64 C 9.72 -0.84 11.81 0 13.94 0 C 16.78 0 19.11 -0.94 20.77 -2.5 C 23.14 -0.8 25.44 0 27.81 0 C 30.66 0 32.88 -0.8 34.36 -2.28 C 36.02 -0.8 38.02 0 40.3 0 C 40.56 0 40.73 -0.22 40.73 -0.48 L 40.73 -6.92 C 40.73 -7.2 40.56 -7.38 40.3 -7.38 Z M 40.3 -7.38 "/>
+</g>
+<g id="lg-0-12">
+<path d="M 11.42 -23.02 C 5.73 -23.02 1.36 -18.69 1.36 -12.61 C 1.36 -10.86 1.83 -9.17 2.64 -7.38 L 0 -7.38 C -0.25 -7.38 -0.42 -7.2 -0.42 -6.92 L -0.42 -0.48 C -0.42 -0.14 -0.3 0 0 0 L 9.77 0 C 17.25 0 21.91 -4.78 21.91 -12.2 C 21.91 -18.47 17.5 -23.02 11.42 -23.02 Z M 9.81 -7.38 L 8.45 -7.38 C 7.69 -9.03 7.27 -10.55 7.27 -11.98 C 7.27 -14.44 9.09 -16.36 11.34 -16.36 C 13.59 -16.36 15.28 -14.62 15.28 -12.25 C 15.28 -9.3 13.25 -7.38 9.81 -7.38 Z M 9.81 -7.38 "/>
+</g>
+<g id="lg-0-13">
+<path d="M 25.22 -7.38 C 23.19 -7.38 21.58 -7.47 20.12 -7.69 C 22.67 -10.23 23.7 -13.19 23.7 -15.56 C 23.7 -20.7 19.62 -24.14 13.72 -24.14 C 10.58 -24.14 7.39 -23.25 3.27 -21.14 L 1.11 -15.64 C 2.67 -12.3 4.16 -9.88 5.78 -7.64 C 4.08 -7.47 2.25 -7.38 0 -7.38 C -0.25 -7.38 -0.42 -7.2 -0.42 -6.92 L -0.42 -0.48 C -0.42 -0.22 -0.25 -0.05 0 0 C 6.33 0 9.59 -0.72 13.8 -2.91 C 17.08 -0.89 20.47 0 25.22 0 C 25.48 0 25.66 -0.22 25.66 -0.48 L 25.66 -6.92 C 25.66 -7.2 25.48 -7.38 25.22 -7.38 Z M 12.83 -17.3 C 15.75 -17.3 17.67 -15.56 17.67 -13.28 C 17.67 -11.31 15.84 -9.08 12.36 -7.73 C 10.28 -9.97 8.83 -12.25 7.09 -16 C 9.3 -16.94 11.17 -17.34 12.83 -17.3 Z M 12.83 -17.3 "/>
+</g>
+<g id="lg-0-14">
+<path d="M 24.38 -7.38 L 22.08 -7.38 C 22.64 -9.34 22.94 -11.12 22.94 -12.88 C 22.94 -18.55 18.47 -23.02 12.95 -23.02 C 6.84 -23.02 2.47 -18.42 2.47 -12.2 C 2.47 -10.64 2.67 -9.2 3.06 -7.88 C 2.17 -7.56 1.14 -7.38 0 -7.38 C -0.25 -7.38 -0.42 -7.2 -0.42 -6.92 L -0.42 -0.48 C -0.42 -0.22 -0.25 0 0 0 C 2.2 0 4.8 -0.8 6.97 -2.23 C 8.92 -0.8 11.47 0 14.39 0 L 24.38 0 C 24.67 0 24.8 -0.14 24.8 -0.48 L 24.8 -6.92 C 24.8 -7.2 24.62 -7.38 24.38 -7.38 Z M 14.36 -7.38 C 11.05 -7.38 9.09 -9.34 9.09 -12.2 C 9.09 -14.62 10.75 -16.41 13.03 -16.41 C 15.28 -16.41 17.08 -14.39 17.08 -11.98 C 17.08 -10.73 16.91 -9.2 16.48 -7.38 Z M 14.36 -7.38 "/>
+</g>
+<g id="lg-0-15">
+<path d="M 7.61 -22.53 C 5.78 -22.53 3.86 -22.08 1.48 -21.02 L 2.72 -14.84 C 4.45 -15.2 5.44 -15.47 6.8 -15.47 C 9.64 -15.47 11.89 -14.27 17.58 -10.19 C 12.48 -8.14 8.06 -7.38 0.05 -7.38 C -0.22 -7.38 -0.42 -7.2 -0.42 -6.92 L -0.42 -0.48 C -0.42 -0.22 -0.22 0 0.05 0 C 9 0 14.66 -1.66 23.06 -6.58 L 24.38 -13.67 C 14.56 -20.88 11.34 -22.53 7.61 -22.53 Z M 9.39 6.3 L 13.84 10.91 L 18.22 6.3 L 13.8 1.7 Z M 9.39 6.3 "/>
+</g>
+<g id="lg-1-0">
+<path d="M 13.12 -5.33 L 11.91 -5.33 L 4.44 -17.53 L 4.44 0 L 2.67 0 L 2.67 -21.09 L 4.56 -21.09 L 12.58 -7.84 L 20.58 -21.09 L 22.47 -21.09 L 22.47 -0.19 L 20.55 0.19 L 20.55 -17.53 Z M 13.12 -5.33 "/>
+</g>
+<g id="lg-1-1">
+<path d="M 15.34 -1.3 C 15.89 -1.3 16.3 -1.38 16.56 -1.55 L 16.56 0 C 16.05 0.21 15.48 0.31 14.86 0.31 C 13.17 0.31 12.26 -0.61 12.12 -2.45 C 10.66 -0.61 8.8 0.31 6.52 0.31 C 4.99 0.31 3.79 -0.1 2.89 -0.94 C 2 -1.78 1.56 -2.86 1.56 -4.19 C 1.56 -5.88 2.16 -7.13 3.38 -7.92 C 4.59 -8.72 6.19 -9.12 8.17 -9.12 C 9.65 -9.12 10.96 -9.03 12.09 -8.84 L 12.09 -10.48 C 12.09 -11.58 11.74 -12.47 11.03 -13.16 C 10.32 -13.85 9.24 -14.2 7.8 -14.2 C 5.97 -14.2 4.25 -13.74 2.62 -12.81 L 2.19 -14.48 C 3.82 -15.37 5.75 -15.81 7.97 -15.81 C 9.93 -15.81 11.41 -15.32 12.42 -14.33 C 13.44 -13.34 13.95 -12.02 13.95 -10.36 L 13.95 -3.08 C 13.95 -1.89 14.41 -1.3 15.34 -1.3 Z M 6.95 -1.33 C 8.87 -1.33 10.58 -2.27 12.09 -4.16 L 12.09 -7.25 C 11.14 -7.44 9.86 -7.53 8.23 -7.53 C 5.04 -7.53 3.44 -6.48 3.44 -4.38 C 3.44 -3.45 3.75 -2.71 4.38 -2.16 C 5.01 -1.6 5.87 -1.33 6.95 -1.33 Z M 6.95 -1.33 "/>
+</g>
+<g id="lg-1-2">
+<path d="M 3.47 -11.59 C 3.47 -10.83 3.78 -10.24 4.41 -9.81 C 5.04 -9.39 5.8 -9.09 6.69 -8.91 C 7.58 -8.72 8.48 -8.5 9.38 -8.25 C 10.28 -8 11.05 -7.55 11.67 -6.91 C 12.3 -6.27 12.61 -5.41 12.61 -4.34 C 12.61 -2.79 12.11 -1.62 11.11 -0.84 C 10.12 -0.07 8.74 0.31 6.97 0.31 C 4.75 0.31 2.88 -0.13 1.34 -1.03 L 1.73 -2.67 C 3.33 -1.75 5.05 -1.3 6.92 -1.3 C 9.48 -1.3 10.77 -2.3 10.77 -4.31 C 10.77 -5.07 10.45 -5.67 9.81 -6.11 C 9.19 -6.55 8.42 -6.86 7.52 -7.05 C 6.62 -7.24 5.72 -7.47 4.81 -7.72 C 3.91 -7.97 3.16 -8.41 2.53 -9.03 C 1.91 -9.66 1.59 -10.52 1.59 -11.59 C 1.59 -13 2.07 -14.05 3.03 -14.75 C 3.99 -15.46 5.29 -15.81 6.92 -15.81 C 9.14 -15.81 11.02 -15.37 12.56 -14.48 L 12.19 -12.84 C 10.57 -13.75 8.82 -14.2 6.92 -14.2 C 4.62 -14.2 3.47 -13.33 3.47 -11.59 Z M 3.47 -11.59 "/>
+</g>
+<g id="lg-1-3">
+<path d="M 10.14 -13.8 C 8.8 -13.8 7.61 -13.45 6.56 -12.77 C 5.51 -12.09 4.7 -11.21 4.12 -10.14 L 4.12 0 L 2.28 0 L 2.28 -15.52 L 4.02 -15.52 L 4.09 -11.97 C 4.66 -13.1 5.46 -14.02 6.48 -14.73 C 7.52 -15.45 8.66 -15.81 9.91 -15.81 Z M 10.14 -13.8 "/>
+</g>
+<g id="lg-1-4">
+<path d="M 5.23 -21.09 L 5.23 -15.52 L 10.67 -15.52 L 10.67 -13.89 L 5.23 -13.89 L 5.23 -4 C 5.23 -2.22 6.21 -1.33 8.17 -1.33 C 8.98 -1.33 9.8 -1.49 10.62 -1.83 L 10.95 -0.31 C 10 0.1 8.94 0.31 7.75 0.31 C 6.25 0.31 5.14 -0.08 4.44 -0.86 C 3.74 -1.65 3.39 -2.69 3.39 -3.97 L 3.39 -13.89 L 1.03 -13.89 L 1.03 -15.52 L 3.39 -15.52 L 3.39 -20.69 Z M 5.23 -21.09 "/>
+</g>
+<g id="lg-1-5">
+</g>
+<g id="lg-1-6">
+<path d="M 17.56 0.19 L 15.45 -5.23 L 4.78 -5.23 L 2.77 0 L 0.77 0 L 9.05 -21.06 L 11.16 -21.44 L 19.47 -0.19 Z M 5.5 -7.08 L 14.75 -7.08 L 10.11 -18.98 Z M 5.5 -7.08 "/>
+</g>
+<g id="lg-1-7">
+<path d="M 9 -15.81 C 11.27 -15.81 13.09 -15.04 14.45 -13.5 C 15.83 -11.97 16.52 -10.05 16.52 -7.75 C 16.52 -5.46 15.83 -3.54 14.45 -2 C 13.09 -0.46 11.27 0.31 9 0.31 C 6.7 0.31 4.87 -0.46 3.52 -2 C 2.16 -3.54 1.48 -5.46 1.48 -7.75 C 1.48 -10.05 2.16 -11.97 3.52 -13.5 C 4.87 -15.04 6.7 -15.81 9 -15.81 Z M 9 -1.33 C 10.76 -1.33 12.14 -1.95 13.14 -3.2 C 14.14 -4.46 14.64 -5.98 14.64 -7.75 C 14.64 -9.53 14.14 -11.05 13.14 -12.31 C 12.14 -13.57 10.76 -14.2 9 -14.2 C 7.21 -14.2 5.81 -13.57 4.81 -12.31 C 3.82 -11.05 3.33 -9.53 3.33 -7.75 C 3.33 -5.98 3.82 -4.46 4.81 -3.2 C 5.81 -1.95 7.21 -1.33 9 -1.33 Z M 9 -1.33 "/>
+</g>
+<g id="lg-1-8">
+<path d="M 9.11 -1.33 C 10.61 -1.33 12.12 -1.77 13.64 -2.64 L 14.03 -1.08 C 12.48 -0.15 10.81 0.31 9.03 0.31 C 6.73 0.31 4.89 -0.41 3.53 -1.88 C 2.16 -3.33 1.48 -5.29 1.48 -7.75 C 1.48 -10.21 2.16 -12.16 3.52 -13.62 C 4.87 -15.08 6.71 -15.81 9.03 -15.81 C 10.79 -15.81 12.46 -15.36 14.03 -14.45 L 13.64 -12.88 C 12.08 -13.76 10.57 -14.2 9.11 -14.2 C 7.38 -14.2 5.99 -13.62 4.94 -12.45 C 3.88 -11.29 3.36 -9.72 3.36 -7.75 C 3.36 -5.79 3.88 -4.23 4.94 -3.06 C 5.99 -1.91 7.38 -1.33 9.11 -1.33 Z M 9.11 -1.33 "/>
+</g>
+<g id="lg-1-9">
+<path d="M 3.22 -18.64 L 1.66 -20.28 L 3.22 -21.95 L 4.75 -20.28 Z M 4.12 0 L 2.28 0 L 2.28 -15.52 L 4.12 -15.52 Z M 4.12 0 "/>
+</g>
+<g id="lg-1-10">
+<path d="M 9.28 -15.81 C 10.95 -15.81 12.23 -15.32 13.12 -14.33 C 14.03 -13.34 14.48 -11.95 14.48 -10.17 L 14.48 0 L 12.64 0 L 12.64 -10.17 C 12.64 -11.45 12.3 -12.44 11.61 -13.14 C 10.93 -13.85 9.97 -14.2 8.72 -14.2 C 6.97 -14.2 5.44 -13.31 4.12 -11.53 L 4.12 0 L 2.28 0 L 2.28 -15.52 L 4.02 -15.52 L 4.12 -13.09 C 5.41 -14.91 7.13 -15.81 9.28 -15.81 Z M 9.28 -15.81 "/>
+</g>
+<g id="lg-1-11">
+<path d="M 2.67 0 L 2.67 -21.09 L 15.75 -21.09 L 15.75 -19.3 L 4.58 -19.3 L 4.58 -10.98 L 14.86 -10.98 L 15.17 -9.19 L 4.58 -9.19 L 4.58 0 Z M 2.67 0 "/>
+</g>
+<g id="lg-1-12">
+<path d="M 10.14 -7.47 L 10.14 0 L 8.23 0 L 8.23 -7.53 L 0.83 -20.91 L 2.7 -21.28 L 9.22 -9.55 L 15.55 -21.09 L 17.56 -21.09 Z M 10.14 -7.47 "/>
+</g>
+<g id="lg-1-13">
+<path d="M 12.5 -15.52 L 14.34 -15.52 L 14.34 0 L 12.61 0 L 12.5 -2.42 C 11.21 -0.6 9.49 0.31 7.34 0.31 C 5.68 0.31 4.39 -0.18 3.48 -1.17 C 2.59 -2.17 2.14 -3.55 2.14 -5.33 L 2.14 -15.45 L 3.98 -15.81 L 3.98 -5.36 C 3.98 -4.05 4.32 -3.05 5 -2.36 C 5.69 -1.67 6.66 -1.33 7.92 -1.33 C 9.68 -1.33 11.21 -2.21 12.5 -3.97 Z M 12.5 -15.52 "/>
+</g>
+<g id="lg-1-14">
+<path d="M 9.28 -15.81 C 10.95 -15.81 12.23 -15.32 13.12 -14.33 C 14.03 -13.34 14.48 -11.95 14.48 -10.17 L 14.48 0 L 12.64 0 L 12.64 -10.17 C 12.64 -11.45 12.3 -12.44 11.61 -13.14 C 10.93 -13.85 9.97 -14.2 8.72 -14.2 C 6.97 -14.2 5.44 -13.31 4.12 -11.53 L 4.12 0 L 2.28 0 L 2.28 -22.27 L 4.12 -22.64 L 4.12 -13.09 C 5.41 -14.91 7.13 -15.81 9.28 -15.81 Z M 9.28 -15.81 "/>
+</g>
+</g>
+</defs><symbol id="masarat-logo" viewBox="196 156 426 276"><path fill="#3c8bb7" d="M 591.72 286.41 C 591.55 285.06 591.12 283.93 590.63 282.82 C 589.4 280.07 587.54 277.79 585.3 275.79 C 583.97 274.6 582.53 273.57 581.02 272.62 C 580.69 272.41 580.11 272.32 580.36 271.69 C 580.59 271.1 581.3 270.71 581.88 270.86 C 582.26 270.96 582.63 271.11 582.99 271.28 C 585.28 272.34 587.21 273.9 588.93 275.73 C 589.27 276.09 589.56 276.54 590.04 276.71 C 590.34 276.46 590.15 276.25 590.09 276.04 C 589.14 273.11 587.52 270.63 585.05 268.75 C 585.02 268.73 584.98 268.7 584.95 268.68 C 583.94 267.84 583.95 267.52 585 266.73 C 585.37 266.44 585.7 266.43 586.08 266.68 C 587.7 267.71 589.43 268.58 590.82 270 C 591.72 270.91 592.93 271.5 593.91 272.35 C 596.25 274.36 598.73 276.21 600.87 278.44 C 601.64 279.24 602.39 280.05 603.07 280.91 C 603.66 281.65 604.25 282.33 605.11 282.84 C 605.89 283.31 606.43 284.18 607.06 284.89 C 609.54 287.65 612.01 290.42 614.5 293.18 C 614.86 293.58 615.07 293.99 615.07 294.54 C 615.06 297.94 615.07 301.34 615.06 304.73 C 615.06 305.03 615.18 305.44 614.82 305.58 C 614.41 305.74 614.2 305.35 613.95 305.11 C 613.2 304.35 612.45 303.59 611.7 302.83 C 611.54 302.66 611.37 302.49 611.2 302.33 C 611.03 302.17 610.85 301.93 610.6 302 C 610.26 302.1 610.32 302.44 610.31 302.71 C 610.3 302.98 610.31 303.26 610.31 303.54 C 610.32 313.57 610.33 323.6 610.34 333.64 C 610.34 333.83 610.34 334.03 610.33 334.23 C 610.28 335.21 610.11 335.39 609.13 335.44 C 608.78 335.46 608.42 335.45 608.07 335.45 C 601.78 335.45 595.49 335.36 589.2 335.47 C 578.65 335.66 568.09 335.82 557.54 335.58 C 551.13 335.43 544.79 334.53 538.79 331.98 C 534.88 330.32 531.43 327.99 528.31 325.15 C 527.11 324.06 525.96 322.92 524.94 321.66 C 524.32 320.9 524.13 320.9 523.51 321.72 C 519.12 327.43 513.39 331.54 507.38 335.32 C 506.72 335.73 506.23 335.66 505.68 335.19 C 504.19 333.95 502.68 332.74 501.2 331.5 C 498.65 329.37 496.12 327.23 493.58 325.09 C 493.37 324.91 493.14 324.74 492.94 324.56 C 492.35 324.03 492.36 323.94 492.93 323.34 C 494.57 321.62 496.37 320.08 498.25 318.63 C 500.12 317.18 501.96 315.68 503.77 314.15 C 504.82 313.25 505.57 312.05 506.75 311.29 C 507.04 310.33 507.73 309.59 508.19 308.72 C 509.48 306.23 510.22 303.64 510.21 300.78 C 510.18 284.9 510.21 269.02 510.22 253.14 C 510.22 252.79 510.23 252.43 510.21 252.07 C 510.18 251.28 510.18 251.26 509.29 251.3 C 508.98 251.32 508.85 251.19 508.82 250.92 C 508.8 250.73 508.79 250.53 508.8 250.33 C 508.85 249.55 509.1 249.4 509.76 249.8 C 511.14 250.65 512.42 251.65 513.66 252.7 C 515.48 254.23 517.13 255.93 518.67 257.73 C 518.95 258.05 519.2 258.41 519.73 258.64 C 519.66 257.32 519.2 256.2 518.72 255.11 C 517.16 251.64 514.71 248.89 511.66 246.65 C 510.96 246.14 510.24 245.65 509.53 245.15 C 509.2 244.92 508.91 244.69 508.82 244.25 C 508.61 243.11 509 242.71 510.07 243.1 C 511.61 243.65 513.02 244.45 514.27 245.5 C 515.39 246.44 516.49 247.41 517.48 248.49 C 517.63 248.65 517.76 248.89 518.09 248.82 C 518.34 248.44 518.1 248.08 517.98 247.73 C 516.63 243.99 514.13 241.25 510.64 239.4 C 508.86 238.45 508.78 238.89 508.79 236.34 C 508.79 235.16 508.77 233.97 508.79 232.79 C 508.8 232.41 508.67 231.99 508.99 231.67 C 509.39 231.63 509.54 231.97 509.75 232.18 C 513.51 235.96 517.29 239.73 521.02 243.54 C 525.27 247.89 529.48 252.29 533.7 256.67 C 534.69 257.69 535.64 258.75 536.63 259.77 C 537.08 260.23 537.26 260.73 537.25 261.36 C 537.24 264.72 537.25 268.08 537.25 271.44 C 537.25 271.48 537.25 271.52 537.25 271.55 C 537.21 271.86 537.35 272.26 536.95 272.37 C 536.66 272.46 536.47 272.15 536.28 271.96 C 535.09 270.8 533.91 269.63 532.73 268.46 C 532.51 268.24 532.29 268.01 532.02 267.84 C 531.73 267.64 531.48 267.76 531.41 268.1 C 531.29 268.61 531.32 269.12 531.39 269.63 C 531.5 270.5 531.5 271.37 531.5 272.23 C 531.51 279.46 531.51 286.69 531.53 293.92 C 531.54 295.19 531.37 296.44 531.31 297.7 C 531.28 298.32 531.41 298.85 531.82 299.35 C 533.58 301.48 535.29 303.66 537.04 305.79 C 538.22 307.22 539.36 308.7 540.86 309.82 C 541.31 310.16 541.43 310.73 541.96 311.03 C 544.41 312.41 546.86 313.76 549.68 314.22 C 550.04 314.28 550.39 314.31 550.75 314.31 C 553.87 314.32 557 314.32 560.12 314.32 C 561.34 314.31 561.44 314.21 561.46 313.07 C 561.53 309.99 561.65 306.91 561.61 303.83 C 561.58 301.54 561.52 299.25 561.4 296.96 C 561.19 292.81 562.78 289.41 565.67 286.56 C 568.31 283.95 571.06 281.45 573.63 278.77 C 574.39 277.96 575.18 277.18 575.89 276.34 C 576.59 275.49 577.38 275.45 578.32 275.84 C 580.05 276.55 581.67 277.44 583.18 278.54 C 586.01 280.59 588.46 283.05 590.76 285.67 C 590.94 285.88 591.12 286.08 591.32 286.27 C 591.37 286.32 591.46 286.32 591.72 286.41 "/>
+<path fill="#f3ab0d" d="M 328.61 258.52 C 328.49 257.31 328.09 256.25 327.64 255.2 C 326.29 251.97 323.99 249.51 321.38 247.28 C 320.47 246.52 319.51 245.81 318.49 245.21 C 317.8 244.8 317.67 244.21 317.73 243.5 C 317.78 242.97 318.04 242.82 318.54 242.95 C 319.54 243.21 320.45 243.68 321.32 244.23 C 323.18 245.39 324.85 246.77 326.31 248.4 C 326.49 248.59 326.61 248.88 327.02 248.86 C 327.16 248.39 326.95 247.96 326.8 247.54 C 325.44 243.84 322.94 241.11 319.45 239.38 C 318.11 238.71 317.55 237.96 317.7 236.48 C 317.82 235.27 317.7 234.04 317.71 232.81 C 317.72 232.43 317.61 232.02 317.86 231.67 C 318.22 231.55 318.36 231.85 318.54 232.03 C 324.24 237.68 329.83 243.43 335.37 249.24 C 336.27 250.18 337.2 251.1 338.1 252.04 C 340.52 254.54 342.92 257.06 345.35 259.54 C 345.95 260.15 346.2 260.81 346.19 261.66 C 346.16 264.86 346.18 268.05 346.17 271.26 C 346.17 271.63 346.34 272.16 345.91 272.33 C 345.48 272.5 345.25 271.98 344.99 271.72 C 343.82 270.6 342.67 269.45 341.52 268.32 C 341.32 268.12 341.12 267.92 340.9 267.77 C 340.6 267.56 340.36 267.64 340.31 268.02 C 340.28 268.29 340.29 268.57 340.29 268.85 C 340.3 275.88 340.27 282.91 340.36 289.94 C 340.41 293.46 340.32 296.98 340.01 300.47 C 339.27 308.78 336.85 316.49 331.35 322.99 C 329.12 325.62 326.61 327.97 323.88 330.07 C 321.4 331.98 318.82 333.73 316.15 335.36 C 315.75 335.59 315.38 335.69 314.92 335.66 C 314.25 335.62 313.58 335.62 312.91 335.62 C 297.25 335.61 281.59 335.66 265.93 335.58 C 260.91 335.56 255.9 335.14 250.89 335.02 C 248.71 334.96 246.59 334.4 244.41 334.55 C 243.85 334.59 243.44 334.34 243.03 333.98 C 241.77 332.87 240.48 331.79 239.05 330.89 C 238.95 330.83 238.86 330.75 238.79 330.66 C 237.63 329.36 236.17 328.38 234.83 327.32 C 233.09 325.94 231.59 324.34 230.01 322.81 C 229.09 321.92 228.43 320.8 227.7 319.74 C 227.02 318.74 226.31 317.76 225.7 316.71 C 224.68 314.93 224.09 312.99 223.49 311.05 C 223.08 309.71 222.88 308.32 222.5 306.99 C 222.03 305.33 222.21 303.71 222.13 302.08 C 222.09 301.38 222.17 300.68 221.77 300.02 C 221.54 299.65 221.66 299.16 221.66 298.73 C 221.65 294.98 221.66 291.23 221.65 287.47 C 221.65 286.84 221.73 286.2 221.32 285.64 C 221.25 285.55 221.21 285.42 221.22 285.31 C 221.37 283.91 220.86 282.61 220.71 281.25 C 220.61 280.36 220.3 279.51 220.08 278.65 C 219.83 277.68 219.46 276.72 218.94 275.83 C 217.86 274.03 216.62 272.47 214.83 271.25 C 212.65 269.75 210.24 268.91 207.77 268.14 C 207.24 267.98 206.71 267.77 206.28 267.45 C 205.8 267.09 205.33 266.82 204.74 266.65 C 203.79 266.38 203.71 265.82 204.41 265.12 C 205.98 263.55 207.55 262 209.13 260.45 C 209.83 259.76 209.83 259.79 210.75 260.19 C 211.98 260.73 213.05 261.52 214.14 262.28 C 216.45 263.88 218.55 265.7 220.48 267.71 C 221.03 268.29 221.6 268.82 221.91 269.57 C 221.97 269.73 222.18 269.91 222.39 269.79 C 222.6 269.68 222.55 269.47 222.48 269.27 C 221.99 267.87 221.43 266.46 220.61 265.23 C 220 264.3 219.34 263.36 218.56 262.53 C 218.1 262.04 217.59 261.6 217.14 261.1 C 216.03 259.87 214.75 258.84 213.35 257.94 C 212.81 257.59 212.68 257.16 212.99 256.66 C 213.71 255.5 214.92 255.21 215.87 256.05 C 216.51 256.62 217.28 257.04 218.02 257.47 C 218.34 257.66 218.59 257.89 218.84 258.14 C 219.27 258.55 219.68 258.98 220.1 259.4 C 220.23 259.53 220.39 259.71 220.59 259.52 C 220.71 259.4 220.69 259.23 220.61 259.07 C 220.43 258.73 220.27 258.37 220.07 258.03 C 219.31 256.71 218.56 255.37 217.39 254.34 C 217.16 254.12 216.94 253.89 216.73 253.66 C 216.49 253.38 216.5 253.08 216.75 252.8 C 217.66 251.79 218.64 250.95 220.17 251.01 C 221.21 251.05 222.16 251.17 223.12 251.66 C 223.98 252.09 224.98 252.29 225.81 252.82 C 227.34 253.78 228.89 254.68 230.41 255.65 C 232.45 256.95 233.82 258.9 235.59 260.46 C 236.11 260.91 236.32 261.57 236.71 262.11 C 238.14 264.07 239.3 266.19 239.9 268.58 C 240.05 269.18 240.26 269.79 240.5 270.36 C 240.71 270.85 240.81 271.32 240.81 271.84 C 240.81 272.03 240.77 272.27 240.86 272.42 C 241.45 273.45 241.26 274.57 241.26 275.66 C 241.27 281.79 241.27 287.91 241.27 294.03 C 241.27 294.66 241.22 295.29 241.59 295.86 C 241.79 296.17 241.73 296.55 241.73 296.91 C 241.73 298.05 241.74 299.2 241.73 300.35 C 241.73 300.89 241.61 301.45 242.04 301.92 C 242.13 302.02 242.15 302.22 242.14 302.38 C 242.06 303.88 242.7 305.17 243.37 306.45 C 243.56 306.84 243.78 307.21 243.95 307.61 C 244.32 308.45 244.91 309.12 245.39 309.87 C 246.34 311.36 247.68 312.46 248.82 313.75 C 249.14 314.12 249.46 314.3 249.93 314.29 C 250.29 314.29 250.64 314.3 251 314.3 C 270.81 314.3 290.62 314.3 310.43 314.34 C 311.86 314.35 312.89 313.94 313.87 312.91 C 316.33 310.34 318.08 307.41 318.85 303.91 C 319.02 303.14 319.12 302.36 319.12 301.57 C 319.12 285.21 319.14 268.86 319.15 252.5 C 319.15 252.18 319.15 251.87 319.12 251.55 C 319.08 251.23 318.92 251.09 318.55 251.14 C 317.73 251.25 317.71 251.23 317.73 250.46 C 317.74 250.16 317.62 249.78 317.97 249.61 C 318.31 249.43 318.57 249.71 318.82 249.88 C 321.48 251.62 323.89 253.66 326.03 256 C 326.7 256.73 327.33 257.5 327.98 258.24 C 328.11 258.39 328.23 258.54 328.61 258.52 "/>
+<path fill="#3c8bb7" d="M 413.03 182.91 C 412.76 182.52 412.87 182.07 412.89 181.65 C 412.91 181.07 413.12 180.96 413.65 181.29 C 415 182.12 416.25 183.09 417.46 184.1 C 419.39 185.7 421.09 187.5 422.73 189.38 C 422.97 189.66 423.16 190.05 423.72 190.05 C 423.52 188.55 422.99 187.2 422.34 185.9 C 420.55 182.35 417.81 179.66 414.59 177.42 C 414.26 177.19 413.93 176.98 413.6 176.76 C 412.93 176.29 412.68 175.57 412.9 174.81 C 412.98 174.53 413.16 174.4 413.43 174.48 C 413.88 174.61 414.34 174.75 414.77 174.94 C 417.2 176.01 419.18 177.69 421.01 179.57 C 421.36 179.93 421.63 180.38 422.23 180.63 C 422.23 180.05 422.07 179.62 421.91 179.18 C 420.54 175.44 418.01 172.73 414.52 170.89 C 414.2 170.72 413.89 170.55 413.56 170.41 C 413.05 170.2 412.87 169.82 412.87 169.29 C 412.88 167.39 412.88 165.5 412.88 163.6 C 412.88 163.45 412.89 163.29 413.12 163.14 C 413.63 163.38 413.99 163.86 414.38 164.28 C 417.49 167.64 420.83 170.79 424.01 174.09 C 428.87 179.12 433.74 184.14 438.6 189.17 C 439.29 189.88 439.93 190.63 440.61 191.34 C 440.95 191.7 441.18 192.09 441.18 192.6 C 441.17 196.12 441.18 199.63 441.17 203.15 C 441.17 203.41 441.24 203.76 440.9 203.86 C 440.59 203.96 440.41 203.67 440.22 203.48 C 439.06 202.35 437.91 201.21 436.76 200.07 C 436.56 199.88 436.38 199.66 436.16 199.5 C 435.75 199.18 435.49 199.27 435.45 199.78 C 435.39 200.45 435.35 201.13 435.51 201.79 C 435.64 202.3 435.65 202.8 435.65 203.32 C 435.65 231.52 435.65 259.73 435.64 287.93 C 435.64 289.39 435.76 290.84 435.3 292.28 C 435.11 292.89 435.23 293.61 435.22 294.29 C 435.21 295.98 435.2 297.68 435.19 299.38 C 435.19 299.89 435.18 300.4 435.31 300.91 C 435.45 301.42 435.45 301.95 435.19 302.41 C 434.81 303.05 434.77 303.75 434.67 304.45 C 433.39 312.95 429.97 320.37 423.73 326.41 C 419.95 330.06 415.73 333.09 411.27 335.82 C 410.66 336.19 410.21 336.13 409.68 335.68 C 405.48 332.15 401.25 328.64 397.04 325.12 C 396.31 324.5 396.33 324.41 396.98 323.72 C 398.89 321.65 401.12 319.95 403.34 318.23 C 405.89 316.24 408.43 314.23 410.48 311.67 C 412.27 309.43 413.42 306.91 414 304.12 C 414.1 303.66 414.12 303.18 414.12 302.71 C 414.12 269.56 414.06 236.42 414.16 203.27 C 414.18 197.07 414.2 190.88 414.29 184.68 C 414.29 184.4 414.29 184.12 414.29 183.85 C 414.26 182.59 414.21 182.55 413.03 182.91 "/>
+<path fill="#f3ab0d" d="M 361.23 189.62 C 361.19 188.47 360.77 187.45 360.35 186.46 C 359.14 183.61 357.3 181.22 354.98 179.18 C 353.7 178.05 352.32 177.05 350.89 176.13 C 350.56 175.92 350.27 175.72 350.22 175.24 C 350.1 173.97 350.36 173.73 351.58 174.15 C 353.83 174.93 355.67 176.37 357.4 177.95 C 357.93 178.43 358.41 178.95 358.91 179.45 C 359.1 179.64 359.25 179.89 359.61 179.89 C 359.81 179.42 359.58 179.02 359.43 178.63 C 358.27 175.49 356.24 173.03 353.43 171.21 C 352.63 170.7 351.81 170.22 350.93 169.85 C 350.49 169.67 350.23 169.4 350.23 168.88 C 350.24 166.91 350.24 164.93 350.25 162.96 C 350.25 162.85 350.33 162.75 350.37 162.65 C 350.75 162.52 350.88 162.82 351.06 163 C 354.68 166.65 358.32 170.28 361.91 173.96 C 366.38 178.54 370.81 183.16 375.26 187.77 C 376.22 188.77 377.14 189.79 378.11 190.78 C 378.55 191.23 378.77 191.72 378.77 192.36 C 378.75 195.76 378.76 199.16 378.76 202.55 C 378.76 202.75 378.75 202.95 378.71 203.14 C 378.64 203.46 378.41 203.5 378.18 203.33 C 377.95 203.18 377.76 202.97 377.56 202.78 C 376.35 201.59 375.14 200.39 373.93 199.2 C 373.73 199.02 373.56 198.73 373.23 198.87 C 372.92 199.01 372.99 199.34 372.99 199.61 C 372.98 201.5 373 203.39 373 205.29 C 373 232.63 373.01 259.97 373 287.31 C 373 291.85 372.72 296.39 372.72 300.93 C 372.72 301.87 372.42 302.8 372.26 303.73 C 371.68 307.2 370.86 310.61 369.51 313.88 C 367.7 318.25 365.06 322.06 361.77 325.43 C 357.93 329.36 353.45 332.45 348.81 335.35 C 348.19 335.74 347.75 335.64 347.23 335.2 C 344.02 332.5 340.8 329.83 337.58 327.15 C 336.61 326.34 335.63 325.54 334.68 324.7 C 333.81 323.95 333.86 323.96 334.6 323.16 C 336.9 320.69 339.64 318.74 342.26 316.64 C 344.17 315.1 346.04 313.52 347.64 311.64 C 349.71 309.2 351 306.41 351.61 303.29 C 351.68 302.94 351.68 302.58 351.68 302.22 C 351.68 301.16 351.64 300.09 351.64 299.02 C 351.64 266.91 351.62 234.79 351.66 202.66 C 351.67 196.38 351.69 190.1 351.73 183.82 C 351.73 183.46 351.73 183.11 351.71 182.75 C 351.69 182.31 351.5 182.07 351.03 182.3 C 350.41 182.61 350.24 182.3 350.23 181.75 C 350.23 181.56 350.22 181.36 350.23 181.16 C 350.3 180.54 350.51 180.42 351.09 180.73 C 351.44 180.92 351.76 181.16 352.09 181.38 C 355.16 183.5 357.88 186.02 360.27 188.9 C 360.5 189.19 360.68 189.59 361.23 189.62 "/>
+<path fill="#3c8bb7" d="M 454.73 248.86 C 454.93 248.38 454.71 248.02 454.57 247.66 C 453.16 243.96 450.71 241.13 447.16 239.39 C 445.83 238.74 445.23 238 445.39 236.51 C 445.51 235.3 445.4 234.06 445.41 232.84 C 445.41 232.45 445.32 232.05 445.54 231.68 C 445.9 231.53 446.04 231.84 446.21 232.02 C 449.51 235.32 452.82 238.61 456.07 241.95 C 460.68 246.66 465.26 251.42 469.84 256.17 C 471 257.36 472.11 258.59 473.27 259.78 C 473.68 260.2 473.88 260.67 473.88 261.26 C 473.87 264.7 473.88 268.13 473.88 271.57 C 473.88 271.73 473.87 271.89 473.84 272.04 C 473.77 272.41 473.54 272.52 473.25 272.27 C 472.83 271.91 472.45 271.51 472.05 271.12 C 471.04 270.12 470.03 269.12 469.01 268.13 C 468.82 267.94 468.62 267.68 468.31 267.78 C 467.93 267.91 467.98 268.28 467.98 268.59 C 468.02 271.19 467.87 273.8 468.09 276.4 C 468.12 276.71 468.14 277.03 468.14 277.35 C 468.14 282.76 468.26 288.18 468.12 293.58 C 467.99 298.59 467.66 303.6 466.39 308.5 C 464.87 314.38 462.17 319.59 458.09 324.13 C 454.43 328.2 450.06 331.36 445.52 334.33 C 444.99 334.68 444.45 335 443.93 335.36 C 443.36 335.75 442.86 335.71 442.32 335.26 C 439.3 332.71 436.26 330.19 433.23 327.65 C 432.09 326.68 430.94 325.71 429.8 324.74 C 428.9 323.98 428.95 324.02 429.77 323.13 C 432.27 320.46 435.25 318.36 438.09 316.09 C 439.42 315.02 440.62 313.82 441.82 312.62 C 441.93 312.51 442.07 312.41 442.15 312.28 C 442.48 311.73 443.19 311.61 443.52 311.02 C 444.93 308.5 446.3 305.97 446.76 303.07 C 446.82 302.64 446.82 302.2 446.82 301.77 C 446.83 285.37 446.84 268.98 446.85 252.59 C 446.85 252.39 446.85 252.19 446.84 251.99 C 446.8 251.23 446.79 251.21 445.96 251.3 C 445.56 251.34 445.46 251.16 445.43 250.85 C 445.42 250.66 445.41 250.45 445.43 250.26 C 445.49 249.56 445.75 249.41 446.34 249.78 C 447.75 250.66 449.06 251.68 450.34 252.75 C 452.35 254.43 454.09 256.36 455.78 258.35 C 455.9 258.5 456.03 258.66 456.35 258.61 C 456.31 257.46 455.89 256.4 455.44 255.38 C 454.18 252.52 452.35 250.07 449.97 248.03 C 448.79 247.02 447.56 246.11 446.27 245.27 C 445.73 244.92 445.39 244.5 445.42 243.82 C 445.45 243 445.64 242.81 446.43 243.04 C 447.46 243.34 448.41 243.81 449.31 244.41 C 450.95 245.51 452.48 246.75 453.84 248.21 C 454.07 248.46 454.25 248.8 454.73 248.86 "/>
+<path fill="#f3ab0d" d="M 392.83 258.38 C 392.91 257.79 392.73 257.23 392.55 256.68 C 391.39 253.27 389.35 250.45 386.66 248.08 C 385.5 247.06 384.27 246.14 382.97 245.3 C 382.74 245.15 382.5 244.99 382.31 244.8 C 382.03 244.5 381.92 243.4 382.15 243.11 C 382.53 242.66 382.98 242.96 383.35 243.1 C 386.14 244.18 388.37 246.05 390.42 248.17 C 390.64 248.39 390.86 248.62 391.09 248.83 C 391.13 248.87 391.24 248.84 391.34 248.84 C 391.55 248.5 391.34 248.17 391.23 247.85 C 389.9 244.01 387.37 241.15 383.75 239.37 C 382.4 238.7 381.87 237.93 382.01 236.46 C 382.13 235.25 382.02 234.02 382.03 232.79 C 382.04 232.41 381.93 232 382.2 231.63 C 382.63 231.58 382.79 231.96 383.02 232.19 C 390.08 239.16 396.91 246.36 403.82 253.47 C 405.8 255.51 407.75 257.59 409.74 259.62 C 410.28 260.16 410.52 260.75 410.51 261.51 C 410.48 264.75 410.5 267.99 410.5 271.23 C 410.5 271.35 410.5 271.47 410.49 271.59 C 410.47 271.86 410.55 272.19 410.25 272.33 C 409.93 272.49 409.76 272.17 409.57 271.99 C 408.33 270.77 407.1 269.54 405.85 268.34 C 405.55 268.06 405.3 267.5 404.82 267.73 C 404.42 267.91 404.61 268.44 404.61 268.81 C 404.61 274.62 404.55 280.43 404.68 286.23 C 404.75 289.48 404.75 292.71 404.61 295.95 C 404.38 301.29 403.82 306.57 402.05 311.67 C 400.45 316.28 398.04 320.41 394.76 324.04 C 390.66 328.56 385.78 332.11 380.6 335.27 C 379.73 335.81 379.61 335.79 378.83 335.13 C 374.68 331.66 370.53 328.18 366.38 324.7 C 365.52 323.98 365.55 323.95 366.29 323.16 C 368.74 320.49 371.74 318.48 374.51 316.2 C 376.89 314.23 379.21 312.2 380.86 309.54 C 382.49 306.89 383.45 304.08 383.45 300.93 C 383.44 284.93 383.46 268.93 383.47 252.93 C 383.47 252.57 383.49 252.21 383.46 251.86 C 383.42 251.16 383.41 251.13 382.62 251.27 C 382.25 251.34 382.08 251.24 382.06 250.89 C 382.04 250.58 382.04 250.26 382.07 249.95 C 382.11 249.59 382.35 249.46 382.66 249.61 C 383.02 249.78 383.35 250 383.68 250.22 C 386.8 252.35 389.52 254.92 391.96 257.79 C 392.18 258.04 392.3 258.45 392.83 258.38 "/>
+<path fill="#3c8bb7" d="M 485.99 247 C 484.54 243.42 481.92 240.92 478.55 239.2 C 477.52 238.67 477.09 238.07 477.15 236.92 C 477.23 235.2 477.17 233.46 477.17 231.69 C 477.8 231.63 478.01 232.07 478.29 232.35 C 481.44 235.51 484.6 238.67 487.68 241.9 C 491.36 245.75 495.14 249.52 498.82 253.38 C 500.67 255.33 502.55 257.25 504.43 259.18 C 505.27 260.04 505.7 260.97 505.66 262.22 C 505.58 265.07 505.63 267.91 505.63 270.75 C 505.63 270.95 505.64 271.15 505.63 271.35 C 505.6 271.69 505.75 272.14 505.38 272.32 C 504.97 272.52 504.77 272.06 504.53 271.84 C 503.32 270.7 502.12 269.55 500.93 268.4 C 500.81 268.29 500.7 268.18 500.59 268.07 C 500.41 267.93 500.24 267.72 499.97 267.85 C 499.77 267.96 499.75 268.17 499.75 268.37 C 499.73 268.72 499.73 269.08 499.73 269.43 C 499.75 276.78 499.76 284.12 499.78 291.47 C 499.79 296.33 499.54 301.16 498.63 305.96 C 497.63 311.24 495.75 316.12 492.66 320.53 C 490.03 324.28 486.77 327.43 483.14 330.21 C 480.79 332.01 478.36 333.71 475.8 335.21 C 474.77 335.81 474.76 335.82 473.84 335.06 C 469.74 331.64 465.64 328.23 461.55 324.81 C 460.66 324.07 460.68 323.93 461.51 323.04 C 463.55 320.87 465.95 319.13 468.27 317.29 C 470.29 315.69 472.17 313.95 474.04 312.2 C 475.53 310.8 476.25 309 477.15 307.3 C 478.06 305.56 478.43 303.68 478.46 301.7 C 478.73 285.27 478.51 268.84 478.6 252.41 C 478.6 252.18 478.6 251.94 478.58 251.7 C 478.54 251.28 478.38 251.01 477.89 251.21 C 477.62 251.32 477.31 251.43 477.23 251.03 C 477.14 250.57 477.04 250.07 477.37 249.67 C 477.54 249.46 477.8 249.64 478.01 249.75 C 479.05 250.34 479.97 251.09 480.9 251.82 C 483.17 253.61 485.2 255.66 487.07 257.86 C 487.3 258.13 487.47 258.46 487.95 258.58 C 488.08 257.89 487.82 257.29 487.62 256.68 C 486.34 252.85 483.89 249.86 480.83 247.31 C 479.92 246.55 478.97 245.84 477.95 245.23 C 477.27 244.82 477.11 244.24 477.18 243.52 C 477.23 243 477.48 242.82 477.98 242.98 C 478.8 243.24 479.62 243.55 480.37 244 C 482.38 245.21 484.2 246.66 485.73 248.44 C 485.91 248.61 486.04 248.95 486.38 248.77 C 486.62 248.64 486.63 248.41 486.45 248.19 C 486.25 247.81 486.18 247.38 485.99 247 "/>
+<path fill="#f3ab0d" d="M 275.73 246.78 C 275.77 246.18 275.69 245.62 275.35 245.09 C 274.75 244.13 274.22 243.12 273.38 242.33 C 272.86 241.84 272.35 241.35 271.87 240.82 C 270.94 239.79 269.82 239.01 268.6 238.35 C 268.21 238.14 267.78 237.87 267.88 237.38 C 268 236.82 268.46 236.57 269.04 236.54 C 269.76 236.51 270.37 236.63 271.01 237.11 C 272.18 237.97 273.48 238.68 274.61 239.62 C 273.98 237.67 272.73 236.22 271.06 235.12 C 270.54 234.77 270.48 234.61 270.93 234.12 C 272.45 232.51 273.96 230.97 276.23 230.34 C 277.03 230.11 277.77 229.79 278.6 229.88 C 280.1 230.02 281.54 230.5 282.62 231.55 C 285.61 234.43 288.51 237.39 291.45 240.32 C 291.79 240.66 292.01 241.06 292.21 241.49 C 292.8 242.75 293.18 244.05 293.02 245.46 C 292.93 246.25 292.55 246.94 292.29 247.66 C 291.82 248.89 291.05 249.91 290.09 250.83 C 288.18 252.66 286.3 254.53 284.48 256.44 C 283.65 257.31 282.7 258.01 281.7 258.61 C 281.04 259 280.25 259.37 279.39 259.33 C 278.91 259.32 278.43 259.29 277.96 259.34 C 275.91 259.53 274.33 258.63 272.94 257.24 C 270.4 254.69 267.82 252.19 265.32 249.6 C 264.26 248.49 263.48 247.16 263.6 245.5 C 263.64 244.83 263.65 244.15 263.59 243.48 C 263.51 242.51 263.93 241.74 264.5 241.01 C 264.62 240.86 264.77 240.72 264.89 240.56 C 265.07 240.32 265.03 239.92 265.42 239.84 C 265.85 239.75 266.31 239.73 266.7 239.93 C 267.96 240.56 269.21 241.16 270.36 242.02 C 272.12 243.34 273.59 244.91 275.14 246.41 C 275.32 246.59 275.5 246.72 275.75 246.76 Z M 275.73 246.78 "/>
+<path fill="#f3ab0d" d="M 243.45 236.62 C 242.65 235.97 242.09 235.07 241.15 234.59 C 240.71 234.38 240.79 234 241.06 233.7 C 242.49 232.12 243.96 230.62 246.11 229.95 C 246.97 229.68 247.76 229.3 248.7 229.38 C 250.23 229.52 251.65 230.02 252.73 231.05 C 255.75 233.94 258.77 236.86 261.61 239.94 C 263.13 241.59 263.6 243.73 262.82 245.96 C 262.68 246.37 262.68 246.8 262.48 247.21 C 261.93 248.35 261.26 249.37 260.33 250.26 C 258.3 252.2 256.32 254.19 254.37 256.21 C 253.2 257.43 251.78 258.21 250.26 258.83 C 249.64 259.09 248.93 258.88 248.26 258.94 C 246.21 259.15 244.61 258.23 243.23 256.86 C 240.63 254.32 238.07 251.73 235.51 249.16 C 234.5 248.14 233.92 246.93 233.94 245.46 C 233.96 244.48 233.97 243.49 233.94 242.5 C 233.9 241.23 234.74 240.4 235.43 239.52 C 235.69 239.18 236.3 239.24 236.67 239.42 C 237.96 240.06 239.29 240.61 240.49 241.49 C 242.44 242.93 244.02 244.73 245.76 246.39 C 245.84 246.46 245.95 246.51 246.18 246.66 C 245.89 245.45 245.47 244.48 244.86 243.52 C 243.89 241.98 242.5 240.89 241.31 239.59 C 240.67 238.88 239.74 238.55 239.01 237.95 C 238.89 237.86 238.71 237.84 238.59 237.75 C 238.32 237.52 237.98 237.3 238.07 236.89 C 238.15 236.46 238.46 236.17 238.88 236.12 C 239.66 236.04 240.39 235.99 241.1 236.59 C 242.05 237.4 243.13 238.04 244.15 238.75 C 244.7 238.66 244.61 238.36 244.39 238.02 L 244.38 238.02 C 243.97 237.62 243.95 236.96 243.45 236.62 "/>
+<path fill="#d1d0d1" d="M 486.45 248.19 C 486.65 248.55 487.1 249.07 486.7 249.3 C 486.21 249.58 485.98 248.95 485.77 248.55 C 485.75 248.52 485.74 248.48 485.73 248.44 C 486.04 248.55 486.32 248.58 486.45 248.19 "/>
+<path fill="#dcdcdc" d="M 244.39 238.02 C 244.49 238.19 244.61 238.34 244.68 238.51 C 244.78 238.73 245.14 239.01 244.82 239.2 C 244.46 239.42 244.35 238.95 244.15 238.75 C 244.32 238.54 244.38 238.29 244.39 238.02 "/>
+<path fill="#dcdcdc" d="M 243.45 236.62 C 244.07 236.88 244.15 237.5 244.39 238.02 C 243.82 237.72 243.72 237.11 243.45 236.62 "/>
+<path fill="#d1d0d1" d="M 485.99 247 C 486.31 247.33 486.46 247.73 486.45 248.19 C 486.15 247.85 485.98 247.46 485.99 247 "/>
+<path fill="#ffffff" d="M 582.76 301.94 C 582.76 297.99 582.76 294.04 582.76 290.09 C 582.76 289.77 582.75 289.46 582.77 289.14 C 582.78 288.91 582.74 288.64 582.98 288.51 C 583.31 288.33 583.49 288.61 583.69 288.79 C 586.4 291.22 588.31 294.17 589.41 297.64 C 590.33 300.55 590.77 303.55 590.88 306.6 C 590.96 308.81 591.11 311.02 591.26 313.22 C 591.36 314.58 591.22 314.8 589.86 315 C 588.14 315.25 586.41 315.47 584.69 315.7 C 584.34 315.74 583.98 315.74 583.62 315.75 C 583.1 315.76 582.8 315.5 582.78 314.98 C 582.76 314.62 582.76 314.27 582.76 313.91 C 582.76 309.92 582.76 305.93 582.76 301.94 "/>
+<path fill="#fefefe" d="M 275.73 246.78 C 275.88 246.78 276.03 246.79 276.04 246.99 C 276.04 247.02 275.99 247.06 275.96 247.06 C 275.76 247.05 275.75 246.91 275.75 246.76 C 275.75 246.76 275.73 246.78 275.73 246.78 "/>
+<g fill="#626567">
+<use xlink:href="#lg-0-0" x="202.67" y="384.88"/>
+<use xlink:href="#lg-0-1" x="227.35" y="384.88"/>
+<use xlink:href="#lg-0-2" x="243.79" y="384.88"/>
+</g>
+<g fill="#626567">
+<use xlink:href="#lg-0-3" x="255.55" y="384.88"/>
+<use xlink:href="#lg-0-4" x="268.93" y="384.88"/>
+<use xlink:href="#lg-0-5" x="283.58" y="384.88"/>
+<use xlink:href="#lg-0-6" x="323.88" y="384.88"/>
+</g>
+<g fill="#626567">
+<use xlink:href="#lg-0-7" x="336.84" y="384.88"/>
+</g>
+<g fill="#626567">
+<use xlink:href="#lg-0-8" x="346.48" y="384.88"/>
+<use xlink:href="#lg-0-9" x="354.97" y="384.88"/>
+</g>
+<g fill="#626567">
+<use xlink:href="#lg-0-7" x="389.29" y="384.88"/>
+</g>
+<g fill="#626567">
+<use xlink:href="#lg-0-10" x="401.26" y="384.88"/>
+</g>
+<g fill="#626567">
+<use xlink:href="#lg-0-3" x="414.85" y="384.88"/>
+<use xlink:href="#lg-0-11" x="428.23" y="384.88"/>
+<use xlink:href="#lg-0-12" x="468.53" y="384.88"/>
+</g>
+<g fill="#626567">
+<use xlink:href="#lg-0-8" x="489.13" y="384.88"/>
+<use xlink:href="#lg-0-0" x="497.63" y="384.88"/>
+<use xlink:href="#lg-0-1" x="522.3" y="384.88"/>
+<use xlink:href="#lg-0-13" x="538.74" y="384.88"/>
+<use xlink:href="#lg-0-14" x="564.13" y="384.88"/>
+<use xlink:href="#lg-0-15" x="588.51" y="384.88"/>
+</g>
+<g fill="#626567">
+<use xlink:href="#lg-1-0" x="202.62" y="422.94"/>
+</g>
+<g fill="#626567">
+<use xlink:href="#lg-1-1" x="227.27" y="422.94"/>
+<use xlink:href="#lg-1-2" x="243.43" y="422.94"/>
+</g>
+<g fill="#626567">
+<use xlink:href="#lg-1-1" x="257.01" y="422.94"/>
+<use xlink:href="#lg-1-3" x="273.17" y="422.94"/>
+</g>
+<g fill="#626567">
+<use xlink:href="#lg-1-1" x="283.31" y="422.94"/>
+</g>
+<g fill="#626567">
+<use xlink:href="#lg-1-4" x="299.42" y="422.94"/>
+</g>
+<g fill="#626567">
+<use xlink:href="#lg-1-5" x="309.95" y="422.94"/>
+</g>
+<g fill="#626567">
+<use xlink:href="#lg-1-5" x="316.78" y="422.94"/>
+</g>
+<g fill="#626567">
+<use xlink:href="#lg-1-6" x="323.61" y="422.94"/>
+<use xlink:href="#lg-1-2" x="343.56" y="422.94"/>
+<use xlink:href="#lg-1-2" x="357.19" y="422.94"/>
+<use xlink:href="#lg-1-7" x="370.83" y="422.94"/>
+<use xlink:href="#lg-1-8" x="388.5" y="422.94"/>
+<use xlink:href="#lg-1-9" x="403.42" y="422.94"/>
+<use xlink:href="#lg-1-1" x="409.51" y="422.94"/>
+</g>
+<g fill="#626567">
+<use xlink:href="#lg-1-4" x="425.62" y="422.94"/>
+<use xlink:href="#lg-1-9" x="436.12" y="422.94"/>
+<use xlink:href="#lg-1-7" x="442.21" y="422.94"/>
+<use xlink:href="#lg-1-10" x="459.88" y="422.94"/>
+</g>
+<g fill="#626567">
+<use xlink:href="#lg-1-5" x="476.22" y="422.94"/>
+</g>
+<g fill="#626567">
+<use xlink:href="#lg-1-11" x="483.05" y="422.94"/>
+</g>
+<g fill="#626567">
+<use xlink:href="#lg-1-7" x="499.56" y="422.94"/>
+<use xlink:href="#lg-1-3" x="517.23" y="422.94"/>
+</g>
+<g fill="#626567">
+<use xlink:href="#lg-1-5" x="527.74" y="422.94"/>
+</g>
+<g fill="#626567">
+<use xlink:href="#lg-1-12" x="534.57" y="422.94"/>
+</g>
+<g fill="#626567">
+<use xlink:href="#lg-1-7" x="550.76" y="422.94"/>
+<use xlink:href="#lg-1-13" x="568.44" y="422.94"/>
+<use xlink:href="#lg-1-4" x="584.75" y="422.94"/>
+<use xlink:href="#lg-1-14" x="595.25" y="422.94"/>
+</g></symbol><symbol id="masarat-mark" viewBox="196 156 426 192"><path fill="#3c8bb7" d="M 591.72 286.41 C 591.55 285.06 591.12 283.93 590.63 282.82 C 589.4 280.07 587.54 277.79 585.3 275.79 C 583.97 274.6 582.53 273.57 581.02 272.62 C 580.69 272.41 580.11 272.32 580.36 271.69 C 580.59 271.1 581.3 270.71 581.88 270.86 C 582.26 270.96 582.63 271.11 582.99 271.28 C 585.28 272.34 587.21 273.9 588.93 275.73 C 589.27 276.09 589.56 276.54 590.04 276.71 C 590.34 276.46 590.15 276.25 590.09 276.04 C 589.14 273.11 587.52 270.63 585.05 268.75 C 585.02 268.73 584.98 268.7 584.95 268.68 C 583.94 267.84 583.95 267.52 585 266.73 C 585.37 266.44 585.7 266.43 586.08 266.68 C 587.7 267.71 589.43 268.58 590.82 270 C 591.72 270.91 592.93 271.5 593.91 272.35 C 596.25 274.36 598.73 276.21 600.87 278.44 C 601.64 279.24 602.39 280.05 603.07 280.91 C 603.66 281.65 604.25 282.33 605.11 282.84 C 605.89 283.31 606.43 284.18 607.06 284.89 C 609.54 287.65 612.01 290.42 614.5 293.18 C 614.86 293.58 615.07 293.99 615.07 294.54 C 615.06 297.94 615.07 301.34 615.06 304.73 C 615.06 305.03 615.18 305.44 614.82 305.58 C 614.41 305.74 614.2 305.35 613.95 305.11 C 613.2 304.35 612.45 303.59 611.7 302.83 C 611.54 302.66 611.37 302.49 611.2 302.33 C 611.03 302.17 610.85 301.93 610.6 302 C 610.26 302.1 610.32 302.44 610.31 302.71 C 610.3 302.98 610.31 303.26 610.31 303.54 C 610.32 313.57 610.33 323.6 610.34 333.64 C 610.34 333.83 610.34 334.03 610.33 334.23 C 610.28 335.21 610.11 335.39 609.13 335.44 C 608.78 335.46 608.42 335.45 608.07 335.45 C 601.78 335.45 595.49 335.36 589.2 335.47 C 578.65 335.66 568.09 335.82 557.54 335.58 C 551.13 335.43 544.79 334.53 538.79 331.98 C 534.88 330.32 531.43 327.99 528.31 325.15 C 527.11 324.06 525.96 322.92 524.94 321.66 C 524.32 320.9 524.13 320.9 523.51 321.72 C 519.12 327.43 513.39 331.54 507.38 335.32 C 506.72 335.73 506.23 335.66 505.68 335.19 C 504.19 333.95 502.68 332.74 501.2 331.5 C 498.65 329.37 496.12 327.23 493.58 325.09 C 493.37 324.91 493.14 324.74 492.94 324.56 C 492.35 324.03 492.36 323.94 492.93 323.34 C 494.57 321.62 496.37 320.08 498.25 318.63 C 500.12 317.18 501.96 315.68 503.77 314.15 C 504.82 313.25 505.57 312.05 506.75 311.29 C 507.04 310.33 507.73 309.59 508.19 308.72 C 509.48 306.23 510.22 303.64 510.21 300.78 C 510.18 284.9 510.21 269.02 510.22 253.14 C 510.22 252.79 510.23 252.43 510.21 252.07 C 510.18 251.28 510.18 251.26 509.29 251.3 C 508.98 251.32 508.85 251.19 508.82 250.92 C 508.8 250.73 508.79 250.53 508.8 250.33 C 508.85 249.55 509.1 249.4 509.76 249.8 C 511.14 250.65 512.42 251.65 513.66 252.7 C 515.48 254.23 517.13 255.93 518.67 257.73 C 518.95 258.05 519.2 258.41 519.73 258.64 C 519.66 257.32 519.2 256.2 518.72 255.11 C 517.16 251.64 514.71 248.89 511.66 246.65 C 510.96 246.14 510.24 245.65 509.53 245.15 C 509.2 244.92 508.91 244.69 508.82 244.25 C 508.61 243.11 509 242.71 510.07 243.1 C 511.61 243.65 513.02 244.45 514.27 245.5 C 515.39 246.44 516.49 247.41 517.48 248.49 C 517.63 248.65 517.76 248.89 518.09 248.82 C 518.34 248.44 518.1 248.08 517.98 247.73 C 516.63 243.99 514.13 241.25 510.64 239.4 C 508.86 238.45 508.78 238.89 508.79 236.34 C 508.79 235.16 508.77 233.97 508.79 232.79 C 508.8 232.41 508.67 231.99 508.99 231.67 C 509.39 231.63 509.54 231.97 509.75 232.18 C 513.51 235.96 517.29 239.73 521.02 243.54 C 525.27 247.89 529.48 252.29 533.7 256.67 C 534.69 257.69 535.64 258.75 536.63 259.77 C 537.08 260.23 537.26 260.73 537.25 261.36 C 537.24 264.72 537.25 268.08 537.25 271.44 C 537.25 271.48 537.25 271.52 537.25 271.55 C 537.21 271.86 537.35 272.26 536.95 272.37 C 536.66 272.46 536.47 272.15 536.28 271.96 C 535.09 270.8 533.91 269.63 532.73 268.46 C 532.51 268.24 532.29 268.01 532.02 267.84 C 531.73 267.64 531.48 267.76 531.41 268.1 C 531.29 268.61 531.32 269.12 531.39 269.63 C 531.5 270.5 531.5 271.37 531.5 272.23 C 531.51 279.46 531.51 286.69 531.53 293.92 C 531.54 295.19 531.37 296.44 531.31 297.7 C 531.28 298.32 531.41 298.85 531.82 299.35 C 533.58 301.48 535.29 303.66 537.04 305.79 C 538.22 307.22 539.36 308.7 540.86 309.82 C 541.31 310.16 541.43 310.73 541.96 311.03 C 544.41 312.41 546.86 313.76 549.68 314.22 C 550.04 314.28 550.39 314.31 550.75 314.31 C 553.87 314.32 557 314.32 560.12 314.32 C 561.34 314.31 561.44 314.21 561.46 313.07 C 561.53 309.99 561.65 306.91 561.61 303.83 C 561.58 301.54 561.52 299.25 561.4 296.96 C 561.19 292.81 562.78 289.41 565.67 286.56 C 568.31 283.95 571.06 281.45 573.63 278.77 C 574.39 277.96 575.18 277.18 575.89 276.34 C 576.59 275.49 577.38 275.45 578.32 275.84 C 580.05 276.55 581.67 277.44 583.18 278.54 C 586.01 280.59 588.46 283.05 590.76 285.67 C 590.94 285.88 591.12 286.08 591.32 286.27 C 591.37 286.32 591.46 286.32 591.72 286.41 "/>
+<path fill="#f3ab0d" d="M 328.61 258.52 C 328.49 257.31 328.09 256.25 327.64 255.2 C 326.29 251.97 323.99 249.51 321.38 247.28 C 320.47 246.52 319.51 245.81 318.49 245.21 C 317.8 244.8 317.67 244.21 317.73 243.5 C 317.78 242.97 318.04 242.82 318.54 242.95 C 319.54 243.21 320.45 243.68 321.32 244.23 C 323.18 245.39 324.85 246.77 326.31 248.4 C 326.49 248.59 326.61 248.88 327.02 248.86 C 327.16 248.39 326.95 247.96 326.8 247.54 C 325.44 243.84 322.94 241.11 319.45 239.38 C 318.11 238.71 317.55 237.96 317.7 236.48 C 317.82 235.27 317.7 234.04 317.71 232.81 C 317.72 232.43 317.61 232.02 317.86 231.67 C 318.22 231.55 318.36 231.85 318.54 232.03 C 324.24 237.68 329.83 243.43 335.37 249.24 C 336.27 250.18 337.2 251.1 338.1 252.04 C 340.52 254.54 342.92 257.06 345.35 259.54 C 345.95 260.15 346.2 260.81 346.19 261.66 C 346.16 264.86 346.18 268.05 346.17 271.26 C 346.17 271.63 346.34 272.16 345.91 272.33 C 345.48 272.5 345.25 271.98 344.99 271.72 C 343.82 270.6 342.67 269.45 341.52 268.32 C 341.32 268.12 341.12 267.92 340.9 267.77 C 340.6 267.56 340.36 267.64 340.31 268.02 C 340.28 268.29 340.29 268.57 340.29 268.85 C 340.3 275.88 340.27 282.91 340.36 289.94 C 340.41 293.46 340.32 296.98 340.01 300.47 C 339.27 308.78 336.85 316.49 331.35 322.99 C 329.12 325.62 326.61 327.97 323.88 330.07 C 321.4 331.98 318.82 333.73 316.15 335.36 C 315.75 335.59 315.38 335.69 314.92 335.66 C 314.25 335.62 313.58 335.62 312.91 335.62 C 297.25 335.61 281.59 335.66 265.93 335.58 C 260.91 335.56 255.9 335.14 250.89 335.02 C 248.71 334.96 246.59 334.4 244.41 334.55 C 243.85 334.59 243.44 334.34 243.03 333.98 C 241.77 332.87 240.48 331.79 239.05 330.89 C 238.95 330.83 238.86 330.75 238.79 330.66 C 237.63 329.36 236.17 328.38 234.83 327.32 C 233.09 325.94 231.59 324.34 230.01 322.81 C 229.09 321.92 228.43 320.8 227.7 319.74 C 227.02 318.74 226.31 317.76 225.7 316.71 C 224.68 314.93 224.09 312.99 223.49 311.05 C 223.08 309.71 222.88 308.32 222.5 306.99 C 222.03 305.33 222.21 303.71 222.13 302.08 C 222.09 301.38 222.17 300.68 221.77 300.02 C 221.54 299.65 221.66 299.16 221.66 298.73 C 221.65 294.98 221.66 291.23 221.65 287.47 C 221.65 286.84 221.73 286.2 221.32 285.64 C 221.25 285.55 221.21 285.42 221.22 285.31 C 221.37 283.91 220.86 282.61 220.71 281.25 C 220.61 280.36 220.3 279.51 220.08 278.65 C 219.83 277.68 219.46 276.72 218.94 275.83 C 217.86 274.03 216.62 272.47 214.83 271.25 C 212.65 269.75 210.24 268.91 207.77 268.14 C 207.24 267.98 206.71 267.77 206.28 267.45 C 205.8 267.09 205.33 266.82 204.74 266.65 C 203.79 266.38 203.71 265.82 204.41 265.12 C 205.98 263.55 207.55 262 209.13 260.45 C 209.83 259.76 209.83 259.79 210.75 260.19 C 211.98 260.73 213.05 261.52 214.14 262.28 C 216.45 263.88 218.55 265.7 220.48 267.71 C 221.03 268.29 221.6 268.82 221.91 269.57 C 221.97 269.73 222.18 269.91 222.39 269.79 C 222.6 269.68 222.55 269.47 222.48 269.27 C 221.99 267.87 221.43 266.46 220.61 265.23 C 220 264.3 219.34 263.36 218.56 262.53 C 218.1 262.04 217.59 261.6 217.14 261.1 C 216.03 259.87 214.75 258.84 213.35 257.94 C 212.81 257.59 212.68 257.16 212.99 256.66 C 213.71 255.5 214.92 255.21 215.87 256.05 C 216.51 256.62 217.28 257.04 218.02 257.47 C 218.34 257.66 218.59 257.89 218.84 258.14 C 219.27 258.55 219.68 258.98 220.1 259.4 C 220.23 259.53 220.39 259.71 220.59 259.52 C 220.71 259.4 220.69 259.23 220.61 259.07 C 220.43 258.73 220.27 258.37 220.07 258.03 C 219.31 256.71 218.56 255.37 217.39 254.34 C 217.16 254.12 216.94 253.89 216.73 253.66 C 216.49 253.38 216.5 253.08 216.75 252.8 C 217.66 251.79 218.64 250.95 220.17 251.01 C 221.21 251.05 222.16 251.17 223.12 251.66 C 223.98 252.09 224.98 252.29 225.81 252.82 C 227.34 253.78 228.89 254.68 230.41 255.65 C 232.45 256.95 233.82 258.9 235.59 260.46 C 236.11 260.91 236.32 261.57 236.71 262.11 C 238.14 264.07 239.3 266.19 239.9 268.58 C 240.05 269.18 240.26 269.79 240.5 270.36 C 240.71 270.85 240.81 271.32 240.81 271.84 C 240.81 272.03 240.77 272.27 240.86 272.42 C 241.45 273.45 241.26 274.57 241.26 275.66 C 241.27 281.79 241.27 287.91 241.27 294.03 C 241.27 294.66 241.22 295.29 241.59 295.86 C 241.79 296.17 241.73 296.55 241.73 296.91 C 241.73 298.05 241.74 299.2 241.73 300.35 C 241.73 300.89 241.61 301.45 242.04 301.92 C 242.13 302.02 242.15 302.22 242.14 302.38 C 242.06 303.88 242.7 305.17 243.37 306.45 C 243.56 306.84 243.78 307.21 243.95 307.61 C 244.32 308.45 244.91 309.12 245.39 309.87 C 246.34 311.36 247.68 312.46 248.82 313.75 C 249.14 314.12 249.46 314.3 249.93 314.29 C 250.29 314.29 250.64 314.3 251 314.3 C 270.81 314.3 290.62 314.3 310.43 314.34 C 311.86 314.35 312.89 313.94 313.87 312.91 C 316.33 310.34 318.08 307.41 318.85 303.91 C 319.02 303.14 319.12 302.36 319.12 301.57 C 319.12 285.21 319.14 268.86 319.15 252.5 C 319.15 252.18 319.15 251.87 319.12 251.55 C 319.08 251.23 318.92 251.09 318.55 251.14 C 317.73 251.25 317.71 251.23 317.73 250.46 C 317.74 250.16 317.62 249.78 317.97 249.61 C 318.31 249.43 318.57 249.71 318.82 249.88 C 321.48 251.62 323.89 253.66 326.03 256 C 326.7 256.73 327.33 257.5 327.98 258.24 C 328.11 258.39 328.23 258.54 328.61 258.52 "/>
+<path fill="#3c8bb7" d="M 413.03 182.91 C 412.76 182.52 412.87 182.07 412.89 181.65 C 412.91 181.07 413.12 180.96 413.65 181.29 C 415 182.12 416.25 183.09 417.46 184.1 C 419.39 185.7 421.09 187.5 422.73 189.38 C 422.97 189.66 423.16 190.05 423.72 190.05 C 423.52 188.55 422.99 187.2 422.34 185.9 C 420.55 182.35 417.81 179.66 414.59 177.42 C 414.26 177.19 413.93 176.98 413.6 176.76 C 412.93 176.29 412.68 175.57 412.9 174.81 C 412.98 174.53 413.16 174.4 413.43 174.48 C 413.88 174.61 414.34 174.75 414.77 174.94 C 417.2 176.01 419.18 177.69 421.01 179.57 C 421.36 179.93 421.63 180.38 422.23 180.63 C 422.23 180.05 422.07 179.62 421.91 179.18 C 420.54 175.44 418.01 172.73 414.52 170.89 C 414.2 170.72 413.89 170.55 413.56 170.41 C 413.05 170.2 412.87 169.82 412.87 169.29 C 412.88 167.39 412.88 165.5 412.88 163.6 C 412.88 163.45 412.89 163.29 413.12 163.14 C 413.63 163.38 413.99 163.86 414.38 164.28 C 417.49 167.64 420.83 170.79 424.01 174.09 C 428.87 179.12 433.74 184.14 438.6 189.17 C 439.29 189.88 439.93 190.63 440.61 191.34 C 440.95 191.7 441.18 192.09 441.18 192.6 C 441.17 196.12 441.18 199.63 441.17 203.15 C 441.17 203.41 441.24 203.76 440.9 203.86 C 440.59 203.96 440.41 203.67 440.22 203.48 C 439.06 202.35 437.91 201.21 436.76 200.07 C 436.56 199.88 436.38 199.66 436.16 199.5 C 435.75 199.18 435.49 199.27 435.45 199.78 C 435.39 200.45 435.35 201.13 435.51 201.79 C 435.64 202.3 435.65 202.8 435.65 203.32 C 435.65 231.52 435.65 259.73 435.64 287.93 C 435.64 289.39 435.76 290.84 435.3 292.28 C 435.11 292.89 435.23 293.61 435.22 294.29 C 435.21 295.98 435.2 297.68 435.19 299.38 C 435.19 299.89 435.18 300.4 435.31 300.91 C 435.45 301.42 435.45 301.95 435.19 302.41 C 434.81 303.05 434.77 303.75 434.67 304.45 C 433.39 312.95 429.97 320.37 423.73 326.41 C 419.95 330.06 415.73 333.09 411.27 335.82 C 410.66 336.19 410.21 336.13 409.68 335.68 C 405.48 332.15 401.25 328.64 397.04 325.12 C 396.31 324.5 396.33 324.41 396.98 323.72 C 398.89 321.65 401.12 319.95 403.34 318.23 C 405.89 316.24 408.43 314.23 410.48 311.67 C 412.27 309.43 413.42 306.91 414 304.12 C 414.1 303.66 414.12 303.18 414.12 302.71 C 414.12 269.56 414.06 236.42 414.16 203.27 C 414.18 197.07 414.2 190.88 414.29 184.68 C 414.29 184.4 414.29 184.12 414.29 183.85 C 414.26 182.59 414.21 182.55 413.03 182.91 "/>
+<path fill="#f3ab0d" d="M 361.23 189.62 C 361.19 188.47 360.77 187.45 360.35 186.46 C 359.14 183.61 357.3 181.22 354.98 179.18 C 353.7 178.05 352.32 177.05 350.89 176.13 C 350.56 175.92 350.27 175.72 350.22 175.24 C 350.1 173.97 350.36 173.73 351.58 174.15 C 353.83 174.93 355.67 176.37 357.4 177.95 C 357.93 178.43 358.41 178.95 358.91 179.45 C 359.1 179.64 359.25 179.89 359.61 179.89 C 359.81 179.42 359.58 179.02 359.43 178.63 C 358.27 175.49 356.24 173.03 353.43 171.21 C 352.63 170.7 351.81 170.22 350.93 169.85 C 350.49 169.67 350.23 169.4 350.23 168.88 C 350.24 166.91 350.24 164.93 350.25 162.96 C 350.25 162.85 350.33 162.75 350.37 162.65 C 350.75 162.52 350.88 162.82 351.06 163 C 354.68 166.65 358.32 170.28 361.91 173.96 C 366.38 178.54 370.81 183.16 375.26 187.77 C 376.22 188.77 377.14 189.79 378.11 190.78 C 378.55 191.23 378.77 191.72 378.77 192.36 C 378.75 195.76 378.76 199.16 378.76 202.55 C 378.76 202.75 378.75 202.95 378.71 203.14 C 378.64 203.46 378.41 203.5 378.18 203.33 C 377.95 203.18 377.76 202.97 377.56 202.78 C 376.35 201.59 375.14 200.39 373.93 199.2 C 373.73 199.02 373.56 198.73 373.23 198.87 C 372.92 199.01 372.99 199.34 372.99 199.61 C 372.98 201.5 373 203.39 373 205.29 C 373 232.63 373.01 259.97 373 287.31 C 373 291.85 372.72 296.39 372.72 300.93 C 372.72 301.87 372.42 302.8 372.26 303.73 C 371.68 307.2 370.86 310.61 369.51 313.88 C 367.7 318.25 365.06 322.06 361.77 325.43 C 357.93 329.36 353.45 332.45 348.81 335.35 C 348.19 335.74 347.75 335.64 347.23 335.2 C 344.02 332.5 340.8 329.83 337.58 327.15 C 336.61 326.34 335.63 325.54 334.68 324.7 C 333.81 323.95 333.86 323.96 334.6 323.16 C 336.9 320.69 339.64 318.74 342.26 316.64 C 344.17 315.1 346.04 313.52 347.64 311.64 C 349.71 309.2 351 306.41 351.61 303.29 C 351.68 302.94 351.68 302.58 351.68 302.22 C 351.68 301.16 351.64 300.09 351.64 299.02 C 351.64 266.91 351.62 234.79 351.66 202.66 C 351.67 196.38 351.69 190.1 351.73 183.82 C 351.73 183.46 351.73 183.11 351.71 182.75 C 351.69 182.31 351.5 182.07 351.03 182.3 C 350.41 182.61 350.24 182.3 350.23 181.75 C 350.23 181.56 350.22 181.36 350.23 181.16 C 350.3 180.54 350.51 180.42 351.09 180.73 C 351.44 180.92 351.76 181.16 352.09 181.38 C 355.16 183.5 357.88 186.02 360.27 188.9 C 360.5 189.19 360.68 189.59 361.23 189.62 "/>
+<path fill="#3c8bb7" d="M 454.73 248.86 C 454.93 248.38 454.71 248.02 454.57 247.66 C 453.16 243.96 450.71 241.13 447.16 239.39 C 445.83 238.74 445.23 238 445.39 236.51 C 445.51 235.3 445.4 234.06 445.41 232.84 C 445.41 232.45 445.32 232.05 445.54 231.68 C 445.9 231.53 446.04 231.84 446.21 232.02 C 449.51 235.32 452.82 238.61 456.07 241.95 C 460.68 246.66 465.26 251.42 469.84 256.17 C 471 257.36 472.11 258.59 473.27 259.78 C 473.68 260.2 473.88 260.67 473.88 261.26 C 473.87 264.7 473.88 268.13 473.88 271.57 C 473.88 271.73 473.87 271.89 473.84 272.04 C 473.77 272.41 473.54 272.52 473.25 272.27 C 472.83 271.91 472.45 271.51 472.05 271.12 C 471.04 270.12 470.03 269.12 469.01 268.13 C 468.82 267.94 468.62 267.68 468.31 267.78 C 467.93 267.91 467.98 268.28 467.98 268.59 C 468.02 271.19 467.87 273.8 468.09 276.4 C 468.12 276.71 468.14 277.03 468.14 277.35 C 468.14 282.76 468.26 288.18 468.12 293.58 C 467.99 298.59 467.66 303.6 466.39 308.5 C 464.87 314.38 462.17 319.59 458.09 324.13 C 454.43 328.2 450.06 331.36 445.52 334.33 C 444.99 334.68 444.45 335 443.93 335.36 C 443.36 335.75 442.86 335.71 442.32 335.26 C 439.3 332.71 436.26 330.19 433.23 327.65 C 432.09 326.68 430.94 325.71 429.8 324.74 C 428.9 323.98 428.95 324.02 429.77 323.13 C 432.27 320.46 435.25 318.36 438.09 316.09 C 439.42 315.02 440.62 313.82 441.82 312.62 C 441.93 312.51 442.07 312.41 442.15 312.28 C 442.48 311.73 443.19 311.61 443.52 311.02 C 444.93 308.5 446.3 305.97 446.76 303.07 C 446.82 302.64 446.82 302.2 446.82 301.77 C 446.83 285.37 446.84 268.98 446.85 252.59 C 446.85 252.39 446.85 252.19 446.84 251.99 C 446.8 251.23 446.79 251.21 445.96 251.3 C 445.56 251.34 445.46 251.16 445.43 250.85 C 445.42 250.66 445.41 250.45 445.43 250.26 C 445.49 249.56 445.75 249.41 446.34 249.78 C 447.75 250.66 449.06 251.68 450.34 252.75 C 452.35 254.43 454.09 256.36 455.78 258.35 C 455.9 258.5 456.03 258.66 456.35 258.61 C 456.31 257.46 455.89 256.4 455.44 255.38 C 454.18 252.52 452.35 250.07 449.97 248.03 C 448.79 247.02 447.56 246.11 446.27 245.27 C 445.73 244.92 445.39 244.5 445.42 243.82 C 445.45 243 445.64 242.81 446.43 243.04 C 447.46 243.34 448.41 243.81 449.31 244.41 C 450.95 245.51 452.48 246.75 453.84 248.21 C 454.07 248.46 454.25 248.8 454.73 248.86 "/>
+<path fill="#f3ab0d" d="M 392.83 258.38 C 392.91 257.79 392.73 257.23 392.55 256.68 C 391.39 253.27 389.35 250.45 386.66 248.08 C 385.5 247.06 384.27 246.14 382.97 245.3 C 382.74 245.15 382.5 244.99 382.31 244.8 C 382.03 244.5 381.92 243.4 382.15 243.11 C 382.53 242.66 382.98 242.96 383.35 243.1 C 386.14 244.18 388.37 246.05 390.42 248.17 C 390.64 248.39 390.86 248.62 391.09 248.83 C 391.13 248.87 391.24 248.84 391.34 248.84 C 391.55 248.5 391.34 248.17 391.23 247.85 C 389.9 244.01 387.37 241.15 383.75 239.37 C 382.4 238.7 381.87 237.93 382.01 236.46 C 382.13 235.25 382.02 234.02 382.03 232.79 C 382.04 232.41 381.93 232 382.2 231.63 C 382.63 231.58 382.79 231.96 383.02 232.19 C 390.08 239.16 396.91 246.36 403.82 253.47 C 405.8 255.51 407.75 257.59 409.74 259.62 C 410.28 260.16 410.52 260.75 410.51 261.51 C 410.48 264.75 410.5 267.99 410.5 271.23 C 410.5 271.35 410.5 271.47 410.49 271.59 C 410.47 271.86 410.55 272.19 410.25 272.33 C 409.93 272.49 409.76 272.17 409.57 271.99 C 408.33 270.77 407.1 269.54 405.85 268.34 C 405.55 268.06 405.3 267.5 404.82 267.73 C 404.42 267.91 404.61 268.44 404.61 268.81 C 404.61 274.62 404.55 280.43 404.68 286.23 C 404.75 289.48 404.75 292.71 404.61 295.95 C 404.38 301.29 403.82 306.57 402.05 311.67 C 400.45 316.28 398.04 320.41 394.76 324.04 C 390.66 328.56 385.78 332.11 380.6 335.27 C 379.73 335.81 379.61 335.79 378.83 335.13 C 374.68 331.66 370.53 328.18 366.38 324.7 C 365.52 323.98 365.55 323.95 366.29 323.16 C 368.74 320.49 371.74 318.48 374.51 316.2 C 376.89 314.23 379.21 312.2 380.86 309.54 C 382.49 306.89 383.45 304.08 383.45 300.93 C 383.44 284.93 383.46 268.93 383.47 252.93 C 383.47 252.57 383.49 252.21 383.46 251.86 C 383.42 251.16 383.41 251.13 382.62 251.27 C 382.25 251.34 382.08 251.24 382.06 250.89 C 382.04 250.58 382.04 250.26 382.07 249.95 C 382.11 249.59 382.35 249.46 382.66 249.61 C 383.02 249.78 383.35 250 383.68 250.22 C 386.8 252.35 389.52 254.92 391.96 257.79 C 392.18 258.04 392.3 258.45 392.83 258.38 "/>
+<path fill="#3c8bb7" d="M 485.99 247 C 484.54 243.42 481.92 240.92 478.55 239.2 C 477.52 238.67 477.09 238.07 477.15 236.92 C 477.23 235.2 477.17 233.46 477.17 231.69 C 477.8 231.63 478.01 232.07 478.29 232.35 C 481.44 235.51 484.6 238.67 487.68 241.9 C 491.36 245.75 495.14 249.52 498.82 253.38 C 500.67 255.33 502.55 257.25 504.43 259.18 C 505.27 260.04 505.7 260.97 505.66 262.22 C 505.58 265.07 505.63 267.91 505.63 270.75 C 505.63 270.95 505.64 271.15 505.63 271.35 C 505.6 271.69 505.75 272.14 505.38 272.32 C 504.97 272.52 504.77 272.06 504.53 271.84 C 503.32 270.7 502.12 269.55 500.93 268.4 C 500.81 268.29 500.7 268.18 500.59 268.07 C 500.41 267.93 500.24 267.72 499.97 267.85 C 499.77 267.96 499.75 268.17 499.75 268.37 C 499.73 268.72 499.73 269.08 499.73 269.43 C 499.75 276.78 499.76 284.12 499.78 291.47 C 499.79 296.33 499.54 301.16 498.63 305.96 C 497.63 311.24 495.75 316.12 492.66 320.53 C 490.03 324.28 486.77 327.43 483.14 330.21 C 480.79 332.01 478.36 333.71 475.8 335.21 C 474.77 335.81 474.76 335.82 473.84 335.06 C 469.74 331.64 465.64 328.23 461.55 324.81 C 460.66 324.07 460.68 323.93 461.51 323.04 C 463.55 320.87 465.95 319.13 468.27 317.29 C 470.29 315.69 472.17 313.95 474.04 312.2 C 475.53 310.8 476.25 309 477.15 307.3 C 478.06 305.56 478.43 303.68 478.46 301.7 C 478.73 285.27 478.51 268.84 478.6 252.41 C 478.6 252.18 478.6 251.94 478.58 251.7 C 478.54 251.28 478.38 251.01 477.89 251.21 C 477.62 251.32 477.31 251.43 477.23 251.03 C 477.14 250.57 477.04 250.07 477.37 249.67 C 477.54 249.46 477.8 249.64 478.01 249.75 C 479.05 250.34 479.97 251.09 480.9 251.82 C 483.17 253.61 485.2 255.66 487.07 257.86 C 487.3 258.13 487.47 258.46 487.95 258.58 C 488.08 257.89 487.82 257.29 487.62 256.68 C 486.34 252.85 483.89 249.86 480.83 247.31 C 479.92 246.55 478.97 245.84 477.95 245.23 C 477.27 244.82 477.11 244.24 477.18 243.52 C 477.23 243 477.48 242.82 477.98 242.98 C 478.8 243.24 479.62 243.55 480.37 244 C 482.38 245.21 484.2 246.66 485.73 248.44 C 485.91 248.61 486.04 248.95 486.38 248.77 C 486.62 248.64 486.63 248.41 486.45 248.19 C 486.25 247.81 486.18 247.38 485.99 247 "/>
+<path fill="#f3ab0d" d="M 275.73 246.78 C 275.77 246.18 275.69 245.62 275.35 245.09 C 274.75 244.13 274.22 243.12 273.38 242.33 C 272.86 241.84 272.35 241.35 271.87 240.82 C 270.94 239.79 269.82 239.01 268.6 238.35 C 268.21 238.14 267.78 237.87 267.88 237.38 C 268 236.82 268.46 236.57 269.04 236.54 C 269.76 236.51 270.37 236.63 271.01 237.11 C 272.18 237.97 273.48 238.68 274.61 239.62 C 273.98 237.67 272.73 236.22 271.06 235.12 C 270.54 234.77 270.48 234.61 270.93 234.12 C 272.45 232.51 273.96 230.97 276.23 230.34 C 277.03 230.11 277.77 229.79 278.6 229.88 C 280.1 230.02 281.54 230.5 282.62 231.55 C 285.61 234.43 288.51 237.39 291.45 240.32 C 291.79 240.66 292.01 241.06 292.21 241.49 C 292.8 242.75 293.18 244.05 293.02 245.46 C 292.93 246.25 292.55 246.94 292.29 247.66 C 291.82 248.89 291.05 249.91 290.09 250.83 C 288.18 252.66 286.3 254.53 284.48 256.44 C 283.65 257.31 282.7 258.01 281.7 258.61 C 281.04 259 280.25 259.37 279.39 259.33 C 278.91 259.32 278.43 259.29 277.96 259.34 C 275.91 259.53 274.33 258.63 272.94 257.24 C 270.4 254.69 267.82 252.19 265.32 249.6 C 264.26 248.49 263.48 247.16 263.6 245.5 C 263.64 244.83 263.65 244.15 263.59 243.48 C 263.51 242.51 263.93 241.74 264.5 241.01 C 264.62 240.86 264.77 240.72 264.89 240.56 C 265.07 240.32 265.03 239.92 265.42 239.84 C 265.85 239.75 266.31 239.73 266.7 239.93 C 267.96 240.56 269.21 241.16 270.36 242.02 C 272.12 243.34 273.59 244.91 275.14 246.41 C 275.32 246.59 275.5 246.72 275.75 246.76 Z M 275.73 246.78 "/>
+<path fill="#f3ab0d" d="M 243.45 236.62 C 242.65 235.97 242.09 235.07 241.15 234.59 C 240.71 234.38 240.79 234 241.06 233.7 C 242.49 232.12 243.96 230.62 246.11 229.95 C 246.97 229.68 247.76 229.3 248.7 229.38 C 250.23 229.52 251.65 230.02 252.73 231.05 C 255.75 233.94 258.77 236.86 261.61 239.94 C 263.13 241.59 263.6 243.73 262.82 245.96 C 262.68 246.37 262.68 246.8 262.48 247.21 C 261.93 248.35 261.26 249.37 260.33 250.26 C 258.3 252.2 256.32 254.19 254.37 256.21 C 253.2 257.43 251.78 258.21 250.26 258.83 C 249.64 259.09 248.93 258.88 248.26 258.94 C 246.21 259.15 244.61 258.23 243.23 256.86 C 240.63 254.32 238.07 251.73 235.51 249.16 C 234.5 248.14 233.92 246.93 233.94 245.46 C 233.96 244.48 233.97 243.49 233.94 242.5 C 233.9 241.23 234.74 240.4 235.43 239.52 C 235.69 239.18 236.3 239.24 236.67 239.42 C 237.96 240.06 239.29 240.61 240.49 241.49 C 242.44 242.93 244.02 244.73 245.76 246.39 C 245.84 246.46 245.95 246.51 246.18 246.66 C 245.89 245.45 245.47 244.48 244.86 243.52 C 243.89 241.98 242.5 240.89 241.31 239.59 C 240.67 238.88 239.74 238.55 239.01 237.95 C 238.89 237.86 238.71 237.84 238.59 237.75 C 238.32 237.52 237.98 237.3 238.07 236.89 C 238.15 236.46 238.46 236.17 238.88 236.12 C 239.66 236.04 240.39 235.99 241.1 236.59 C 242.05 237.4 243.13 238.04 244.15 238.75 C 244.7 238.66 244.61 238.36 244.39 238.02 L 244.38 238.02 C 243.97 237.62 243.95 236.96 243.45 236.62 "/>
+<path fill="#d1d0d1" d="M 486.45 248.19 C 486.65 248.55 487.1 249.07 486.7 249.3 C 486.21 249.58 485.98 248.95 485.77 248.55 C 485.75 248.52 485.74 248.48 485.73 248.44 C 486.04 248.55 486.32 248.58 486.45 248.19 "/>
+<path fill="#dcdcdc" d="M 244.39 238.02 C 244.49 238.19 244.61 238.34 244.68 238.51 C 244.78 238.73 245.14 239.01 244.82 239.2 C 244.46 239.42 244.35 238.95 244.15 238.75 C 244.32 238.54 244.38 238.29 244.39 238.02 "/>
+<path fill="#dcdcdc" d="M 243.45 236.62 C 244.07 236.88 244.15 237.5 244.39 238.02 C 243.82 237.72 243.72 237.11 243.45 236.62 "/>
+<path fill="#d1d0d1" d="M 485.99 247 C 486.31 247.33 486.46 247.73 486.45 248.19 C 486.15 247.85 485.98 247.46 485.99 247 "/>
+<path fill="#ffffff" d="M 582.76 301.94 C 582.76 297.99 582.76 294.04 582.76 290.09 C 582.76 289.77 582.75 289.46 582.77 289.14 C 582.78 288.91 582.74 288.64 582.98 288.51 C 583.31 288.33 583.49 288.61 583.69 288.79 C 586.4 291.22 588.31 294.17 589.41 297.64 C 590.33 300.55 590.77 303.55 590.88 306.6 C 590.96 308.81 591.11 311.02 591.26 313.22 C 591.36 314.58 591.22 314.8 589.86 315 C 588.14 315.25 586.41 315.47 584.69 315.7 C 584.34 315.74 583.98 315.74 583.62 315.75 C 583.1 315.76 582.8 315.5 582.78 314.98 C 582.76 314.62 582.76 314.27 582.76 313.91 C 582.76 309.92 582.76 305.93 582.76 301.94 "/>
+<path fill="#fefefe" d="M 275.73 246.78 C 275.88 246.78 276.03 246.79 276.04 246.99 C 276.04 247.02 275.99 247.06 275.96 247.06 C 275.76 247.05 275.75 246.91 275.75 246.76 C 275.75 246.76 275.73 246.78 275.73 246.78 "/>
+</symbol></svg>
+<div class="wrap">
+  <header class="top">
+    <div class="brand"><svg role="img" aria-label="جمعية مسارات الشبابية"><use href="#masarat-mark"/></svg><span>بوصلة التطوع</span></div>
+    <button class="restart" id="restart" type="button" hidden>البدء من جديد</button>
+  </header>
+  <main id="app"></main>
+  <div class="shelf" id="shelf" hidden></div>
+</div>
+
+<script>
+"use strict";
+/* ---------- content ---------- */
+const DIMS = ["V","U","S","C","P","E"];
+const TYPES = {
+  V:{name:"صاحب الأثر", dim:"القيم", tag:"تتحرك حين ترى حاجة حقيقية. القضية عندك قبل المكان والمنصب.",
+     tip:"قبل أي فرصة اسأل: من المستفيد، وما الذي سيتغير عنده؟ تستمر حين ترى الأثر بعينك."},
+  U:{name:"المستكشف", dim:"الفهم", tag:"التطوع عندك مدرسة مفتوحة. كل تجربة جديدة تزيدك فهماً لنفسك وللناس.",
+     tip:"اختر فرصاً تجرّب فيها شيئاً لم تفعله من قبل، واطلب دوراً يتغيّر من فترة لأخرى."},
+  S:{name:"صانع الروابط", dim:"الاجتماعي", tag:"طاقتك من الناس. تعطي أفضل ما عندك وسط فريق يشبهك.",
+     tip:"ابحث عن فريق تطوعي ثابت، وادعُ صديقاً يتطوع معك."},
+  C:{name:"باني المسار", dim:"المهني", tag:"ترى في التطوع استثماراً في مستقبلك: خبرة موثقة وعلاقات مهنية.",
+     tip:"اختر فرصاً قريبة من تخصصك، ووثّق ساعاتك وشهاداتك في المنصة الوطنية للعمل التطوعي."},
+  P:{name:"المتوازن", dim:"الوقائي", tag:"التطوع مساحتك للراحة وتصفية الذهن. العطاء يعيد إليك توازنك.",
+     tip:"اختر فرصاً هادئة ومنتظمة بساعات قليلة، واجعلها موعداً ثابتاً في أسبوعك."},
+  E:{name:"المتنامي", dim:"التعزيز", tag:"يكبر تقديرك لنفسك مع كل إنجاز. تحب أن ترى بصمتك واضحة.",
+     tip:"اطلب دوراً له مسؤولية محددة ونتيجة تُرى، واسأل عن تقييم أدائك بعد كل مشاركة."}
+};
+const EMERGING = {name:"توجه ناشئ", tag:"دوافعك للتطوع لم تتضح بعد، وهذا طبيعي قبل التجربة.",
+  tip:"ابدأ بدور قصير لا يتجاوز بضع ساعات، ثم أعد المقياس بعده لترى أين تتجه بوصلتك."};
+/* 18 statements, canonical order: V1-3, U4-6, S7-9, C10-12, P13-15, E16-18 */
+const ITEMS = [
+ "أشعر بمسؤولية حقيقية تجاه من يحتاجون المساعدة في مجتمعي",
+ "خدمة الآخرين قيمة أساسية أعيش بها",
+ "يهمني أن أساهم في قضايا أؤمن بأهميتها",
+ "أرى في التطوع فرصة لتعلّم أشياء جديدة بالتجربة المباشرة",
+ "يساعدني التطوع على فهم الناس والمجتمع من زوايا مختلفة",
+ "أحب أن أكتشف قدراتي ونقاط قوتي من خلال العمل الميداني",
+ "أتحمس للتطوع أكثر عندما يشاركني أصدقائي أو أشخاص أعرفهم",
+ "أستمتع بالتعرف على أشخاص جدد يشاركونني الاهتمام نفسه",
+ "يعني لي الانتماء إلى فريق تطوعي الشيء الكثير",
+ "أعتبر التطوع خطوة تدعم مستقبلي المهني أو الدراسي",
+ "يهمني أن يضيف التطوع خبرة وشهادات إلى سيرتي الذاتية",
+ "أبحث في التطوع عن علاقات وفرص في مجال تخصصي",
+ "يخفف عني التطوع ضغوط الحياة اليومية",
+ "يمنحني التطوع شعوراً بالراحة والطمأنينة",
+ "يساعدني التطوع على تجاوز مشاعر سلبية أو أوقات صعبة أمرّ بها",
+ "أشعر بقيمتي أكثر عندما أعرف أن هناك من يحتاج جهدي",
+ "يرفع التطوع ثقتي بنفسي",
+ "أشعر بالفخر والرضا بعد كل مشاركة تطوعية"
+];
+const ORDER = [0,3,6,9,12,15,1,4,7,10,13,16,2,5,8,11,14,17];
+const SCALE = ["لا تنطبق أبداً","تنطبق قليلاً","محايد","تنطبق غالباً","تنطبق تماماً"];
+const Q = {
+  g:{label:"الجنس", opts:[["m","ذكر"],["f","أنثى"]]},
+  age:{label:"الفئة العمرية", opts:[["u18","أقل من 18"],["18-24","18–24"],["25-34","25–34"],["35-44","35–44"],["45+","45 فأكثر"]]},
+  exp:{label:"خبرتك التطوعية", opts:[["none","لم أتطوع بعد"],["some","تطوعت مرات قليلة"],["regular","أتطوع بانتظام"]]},
+  lvl:{label:"ما الذي تستطيع تقديمه أكثر؟", opts:[
+    [0,"وقتي وجهدي في أي مهمة مطلوبة"],
+    [1,"مهارة عملية اكتسبتها بالممارسة أو التدريب","مثل التصوير، التصميم، التنظيم، الإلقاء"],
+    [2,"خبرة من تخصصي العلمي أو مهنتي","مثل التدريب، المحاسبة، القانون، التقنية، الإرشاد"]]},
+  dom:{label:"المجالات الأقرب لك", opts:[
+    ["health","صحي"],["env","بيئي"],["law","قانوني"],["edu","تعليمي"],["rel","ديني"],["soc","اجتماعي وإنساني"],
+    ["cul","ثقافي"],["art","فني وإبداعي"],["media","إعلامي"],["sport","رياضي"],["tour","سياحي"],["fun","ترفيهي"],
+    ["it","تقنية المعلومات"],["admin","إداري"],["safety","الأمن والسلامة"],["eng","هندسي"],
+    ["urban","التطوير العمراني"],["res","البحث العلمي والابتكار"]]},
+  place:{label:"أين تفضّل أن تتطوع؟", opts:[["in","داخل مقر الجمعية"],["out","في الميدان: مدارس، أحياء، فعاليات"],["any","لا فرق عندي"]]},
+  time:{label:"وقتك المتاح للتطوع شهرياً", opts:[["low","أقل من 4 ساعات"],["mid","4–10 ساعات"],["high","أكثر من 10 ساعات"],["season","في المواسم والفعاليات فقط"]]}
+};
+const LEVELS = [
+  ["تطوع عام","أدوار لا تتطلب مهارة محددة، يكفيها وقتك وحماسك."],
+  ["تطوع مهاري","أدوار تعتمد على مهارة اكتسبتها بالممارسة أو التدريب."],
+  ["تطوع احترافي","أدوار تحتاج خبرة تخصصك العلمي أو المهني."]
+];
+const LINKS = {vol:"https://forms.gle/swe5aMZgwAy94J7f6", pro:"https://forms.gle/ZgoWJSYTaueovGY7A"};
+const QR = {"vol": {"n": 29, "d": "M0 0h1v1h-1zM1 0h1v1h-1zM2 0h1v1h-1zM3 0h1v1h-1zM4 0h1v1h-1zM5 0h1v1h-1zM6 0h1v1h-1zM10 0h1v1h-1zM14 0h1v1h-1zM18 0h1v1h-1zM19 0h1v1h-1zM22 0h1v1h-1zM23 0h1v1h-1zM24 0h1v1h-1zM25 0h1v1h-1zM26 0h1v1h-1zM27 0h1v1h-1zM28 0h1v1h-1zM0 1h1v1h-1zM6 1h1v1h-1zM12 1h1v1h-1zM16 1h1v1h-1zM17 1h1v1h-1zM20 1h1v1h-1zM22 1h1v1h-1zM28 1h1v1h-1zM0 2h1v1h-1zM2 2h1v1h-1zM3 2h1v1h-1zM4 2h1v1h-1zM6 2h1v1h-1zM9 2h1v1h-1zM11 2h1v1h-1zM12 2h1v1h-1zM14 2h1v1h-1zM15 2h1v1h-1zM17 2h1v1h-1zM20 2h1v1h-1zM22 2h1v1h-1zM24 2h1v1h-1zM25 2h1v1h-1zM26 2h1v1h-1zM28 2h1v1h-1zM0 3h1v1h-1zM2 3h1v1h-1zM3 3h1v1h-1zM4 3h1v1h-1zM6 3h1v1h-1zM13 3h1v1h-1zM17 3h1v1h-1zM18 3h1v1h-1zM19 3h1v1h-1zM20 3h1v1h-1zM22 3h1v1h-1zM24 3h1v1h-1zM25 3h1v1h-1zM26 3h1v1h-1zM28 3h1v1h-1zM0 4h1v1h-1zM2 4h1v1h-1zM3 4h1v1h-1zM4 4h1v1h-1zM6 4h1v1h-1zM10 4h1v1h-1zM17 4h1v1h-1zM18 4h1v1h-1zM20 4h1v1h-1zM22 4h1v1h-1zM24 4h1v1h-1zM25 4h1v1h-1zM26 4h1v1h-1zM28 4h1v1h-1zM0 5h1v1h-1zM6 5h1v1h-1zM8 5h1v1h-1zM10 5h1v1h-1zM15 5h1v1h-1zM18 5h1v1h-1zM19 5h1v1h-1zM22 5h1v1h-1zM28 5h1v1h-1zM0 6h1v1h-1zM1 6h1v1h-1zM2 6h1v1h-1zM3 6h1v1h-1zM4 6h1v1h-1zM5 6h1v1h-1zM6 6h1v1h-1zM8 6h1v1h-1zM10 6h1v1h-1zM12 6h1v1h-1zM14 6h1v1h-1zM16 6h1v1h-1zM18 6h1v1h-1zM20 6h1v1h-1zM22 6h1v1h-1zM23 6h1v1h-1zM24 6h1v1h-1zM25 6h1v1h-1zM26 6h1v1h-1zM27 6h1v1h-1zM28 6h1v1h-1zM9 7h1v1h-1zM13 7h1v1h-1zM17 7h1v1h-1zM18 7h1v1h-1zM20 7h1v1h-1zM0 8h1v1h-1zM3 8h1v1h-1zM5 8h1v1h-1zM6 8h1v1h-1zM8 8h1v1h-1zM11 8h1v1h-1zM14 8h1v1h-1zM17 8h1v1h-1zM21 8h1v1h-1zM23 8h1v1h-1zM0 9h1v1h-1zM3 9h1v1h-1zM8 9h1v1h-1zM10 9h1v1h-1zM12 9h1v1h-1zM13 9h1v1h-1zM18 9h1v1h-1zM20 9h1v1h-1zM22 9h1v1h-1zM25 9h1v1h-1zM28 9h1v1h-1zM6 10h1v1h-1zM7 10h1v1h-1zM8 10h1v1h-1zM13 10h1v1h-1zM14 10h1v1h-1zM17 10h1v1h-1zM18 10h1v1h-1zM19 10h1v1h-1zM23 10h1v1h-1zM24 10h1v1h-1zM25 10h1v1h-1zM26 10h1v1h-1zM27 10h1v1h-1zM1 11h1v1h-1zM2 11h1v1h-1zM4 11h1v1h-1zM5 11h1v1h-1zM7 11h1v1h-1zM9 11h1v1h-1zM13 11h1v1h-1zM16 11h1v1h-1zM22 11h1v1h-1zM23 11h1v1h-1zM24 11h1v1h-1zM26 11h1v1h-1zM27 11h1v1h-1zM0 12h1v1h-1zM1 12h1v1h-1zM2 12h1v1h-1zM3 12h1v1h-1zM6 12h1v1h-1zM7 12h1v1h-1zM8 12h1v1h-1zM10 12h1v1h-1zM12 12h1v1h-1zM14 12h1v1h-1zM16 12h1v1h-1zM17 12h1v1h-1zM22 12h1v1h-1zM25 12h1v1h-1zM27 12h1v1h-1zM28 12h1v1h-1zM0 13h1v1h-1zM4 13h1v1h-1zM5 13h1v1h-1zM7 13h1v1h-1zM8 13h1v1h-1zM13 13h1v1h-1zM14 13h1v1h-1zM17 13h1v1h-1zM19 13h1v1h-1zM20 13h1v1h-1zM21 13h1v1h-1zM1 14h1v1h-1zM2 14h1v1h-1zM4 14h1v1h-1zM6 14h1v1h-1zM9 14h1v1h-1zM10 14h1v1h-1zM11 14h1v1h-1zM13 14h1v1h-1zM14 14h1v1h-1zM20 14h1v1h-1zM21 14h1v1h-1zM23 14h1v1h-1zM25 14h1v1h-1zM26 14h1v1h-1zM27 14h1v1h-1zM28 14h1v1h-1zM1 15h1v1h-1zM4 15h1v1h-1zM5 15h1v1h-1zM7 15h1v1h-1zM9 15h1v1h-1zM11 15h1v1h-1zM16 15h1v1h-1zM17 15h1v1h-1zM18 15h1v1h-1zM21 15h1v1h-1zM22 15h1v1h-1zM23 15h1v1h-1zM25 15h1v1h-1zM27 15h1v1h-1zM0 16h1v1h-1zM2 16h1v1h-1zM3 16h1v1h-1zM4 16h1v1h-1zM6 16h1v1h-1zM7 16h1v1h-1zM8 16h1v1h-1zM12 16h1v1h-1zM13 16h1v1h-1zM16 16h1v1h-1zM17 16h1v1h-1zM19 16h1v1h-1zM21 16h1v1h-1zM23 16h1v1h-1zM27 16h1v1h-1zM1 17h1v1h-1zM3 17h1v1h-1zM4 17h1v1h-1zM5 17h1v1h-1zM8 17h1v1h-1zM10 17h1v1h-1zM11 17h1v1h-1zM13 17h1v1h-1zM14 17h1v1h-1zM18 17h1v1h-1zM21 17h1v1h-1zM22 17h1v1h-1zM23 17h1v1h-1zM25 17h1v1h-1zM28 17h1v1h-1zM0 18h1v1h-1zM6 18h1v1h-1zM10 18h1v1h-1zM14 18h1v1h-1zM16 18h1v1h-1zM17 18h1v1h-1zM21 18h1v1h-1zM22 18h1v1h-1zM23 18h1v1h-1zM27 18h1v1h-1zM28 18h1v1h-1zM2 19h1v1h-1zM3 19h1v1h-1zM4 19h1v1h-1zM8 19h1v1h-1zM10 19h1v1h-1zM14 19h1v1h-1zM16 19h1v1h-1zM17 19h1v1h-1zM18 19h1v1h-1zM19 19h1v1h-1zM20 19h1v1h-1zM24 19h1v1h-1zM27 19h1v1h-1zM28 19h1v1h-1zM0 20h1v1h-1zM2 20h1v1h-1zM5 20h1v1h-1zM6 20h1v1h-1zM9 20h1v1h-1zM10 20h1v1h-1zM12 20h1v1h-1zM15 20h1v1h-1zM16 20h1v1h-1zM17 20h1v1h-1zM19 20h1v1h-1zM20 20h1v1h-1zM21 20h1v1h-1zM22 20h1v1h-1zM23 20h1v1h-1zM24 20h1v1h-1zM26 20h1v1h-1zM8 21h1v1h-1zM10 21h1v1h-1zM11 21h1v1h-1zM12 21h1v1h-1zM14 21h1v1h-1zM15 21h1v1h-1zM16 21h1v1h-1zM17 21h1v1h-1zM19 21h1v1h-1zM20 21h1v1h-1zM24 21h1v1h-1zM26 21h1v1h-1zM27 21h1v1h-1zM28 21h1v1h-1zM0 22h1v1h-1zM1 22h1v1h-1zM2 22h1v1h-1zM3 22h1v1h-1zM4 22h1v1h-1zM5 22h1v1h-1zM6 22h1v1h-1zM9 22h1v1h-1zM18 22h1v1h-1zM20 22h1v1h-1zM22 22h1v1h-1zM24 22h1v1h-1zM27 22h1v1h-1zM0 23h1v1h-1zM6 23h1v1h-1zM8 23h1v1h-1zM9 23h1v1h-1zM10 23h1v1h-1zM12 23h1v1h-1zM14 23h1v1h-1zM15 23h1v1h-1zM16 23h1v1h-1zM18 23h1v1h-1zM19 23h1v1h-1zM20 23h1v1h-1zM24 23h1v1h-1zM25 23h1v1h-1zM26 23h1v1h-1zM28 23h1v1h-1zM0 24h1v1h-1zM2 24h1v1h-1zM3 24h1v1h-1zM4 24h1v1h-1zM6 24h1v1h-1zM10 24h1v1h-1zM11 24h1v1h-1zM17 24h1v1h-1zM20 24h1v1h-1zM21 24h1v1h-1zM22 24h1v1h-1zM23 24h1v1h-1zM24 24h1v1h-1zM28 24h1v1h-1zM0 25h1v1h-1zM2 25h1v1h-1zM3 25h1v1h-1zM4 25h1v1h-1zM6 25h1v1h-1zM8 25h1v1h-1zM9 25h1v1h-1zM11 25h1v1h-1zM13 25h1v1h-1zM16 25h1v1h-1zM18 25h1v1h-1zM19 25h1v1h-1zM22 25h1v1h-1zM23 25h1v1h-1zM24 25h1v1h-1zM25 25h1v1h-1zM26 25h1v1h-1zM27 25h1v1h-1zM0 26h1v1h-1zM2 26h1v1h-1zM3 26h1v1h-1zM4 26h1v1h-1zM6 26h1v1h-1zM14 26h1v1h-1zM17 26h1v1h-1zM18 26h1v1h-1zM19 26h1v1h-1zM24 26h1v1h-1zM25 26h1v1h-1zM26 26h1v1h-1zM28 26h1v1h-1zM0 27h1v1h-1zM6 27h1v1h-1zM9 27h1v1h-1zM10 27h1v1h-1zM12 27h1v1h-1zM15 27h1v1h-1zM17 27h1v1h-1zM18 27h1v1h-1zM19 27h1v1h-1zM20 27h1v1h-1zM22 27h1v1h-1zM23 27h1v1h-1zM24 27h1v1h-1zM27 27h1v1h-1zM0 28h1v1h-1zM1 28h1v1h-1zM2 28h1v1h-1zM3 28h1v1h-1zM4 28h1v1h-1zM5 28h1v1h-1zM6 28h1v1h-1zM8 28h1v1h-1zM11 28h1v1h-1zM13 28h1v1h-1zM15 28h1v1h-1zM16 28h1v1h-1zM17 28h1v1h-1zM18 28h1v1h-1zM20 28h1v1h-1zM23 28h1v1h-1zM24 28h1v1h-1zM25 28h1v1h-1zM27 28h1v1h-1z"}, "pro": {"n": 29, "d": "M0 0h1v1h-1zM1 0h1v1h-1zM2 0h1v1h-1zM3 0h1v1h-1zM4 0h1v1h-1zM5 0h1v1h-1zM6 0h1v1h-1zM10 0h1v1h-1zM15 0h1v1h-1zM16 0h1v1h-1zM17 0h1v1h-1zM18 0h1v1h-1zM20 0h1v1h-1zM22 0h1v1h-1zM23 0h1v1h-1zM24 0h1v1h-1zM25 0h1v1h-1zM26 0h1v1h-1zM27 0h1v1h-1zM28 0h1v1h-1zM0 1h1v1h-1zM6 1h1v1h-1zM9 1h1v1h-1zM11 1h1v1h-1zM17 1h1v1h-1zM18 1h1v1h-1zM20 1h1v1h-1zM22 1h1v1h-1zM28 1h1v1h-1zM0 2h1v1h-1zM2 2h1v1h-1zM3 2h1v1h-1zM4 2h1v1h-1zM6 2h1v1h-1zM8 2h1v1h-1zM9 2h1v1h-1zM14 2h1v1h-1zM16 2h1v1h-1zM18 2h1v1h-1zM19 2h1v1h-1zM20 2h1v1h-1zM22 2h1v1h-1zM24 2h1v1h-1zM25 2h1v1h-1zM26 2h1v1h-1zM28 2h1v1h-1zM0 3h1v1h-1zM2 3h1v1h-1zM3 3h1v1h-1zM4 3h1v1h-1zM6 3h1v1h-1zM8 3h1v1h-1zM10 3h1v1h-1zM11 3h1v1h-1zM20 3h1v1h-1zM22 3h1v1h-1zM24 3h1v1h-1zM25 3h1v1h-1zM26 3h1v1h-1zM28 3h1v1h-1zM0 4h1v1h-1zM2 4h1v1h-1zM3 4h1v1h-1zM4 4h1v1h-1zM6 4h1v1h-1zM8 4h1v1h-1zM9 4h1v1h-1zM11 4h1v1h-1zM13 4h1v1h-1zM14 4h1v1h-1zM15 4h1v1h-1zM20 4h1v1h-1zM22 4h1v1h-1zM24 4h1v1h-1zM25 4h1v1h-1zM26 4h1v1h-1zM28 4h1v1h-1zM0 5h1v1h-1zM6 5h1v1h-1zM8 5h1v1h-1zM9 5h1v1h-1zM12 5h1v1h-1zM13 5h1v1h-1zM14 5h1v1h-1zM15 5h1v1h-1zM16 5h1v1h-1zM17 5h1v1h-1zM18 5h1v1h-1zM20 5h1v1h-1zM22 5h1v1h-1zM28 5h1v1h-1zM0 6h1v1h-1zM1 6h1v1h-1zM2 6h1v1h-1zM3 6h1v1h-1zM4 6h1v1h-1zM5 6h1v1h-1zM6 6h1v1h-1zM8 6h1v1h-1zM10 6h1v1h-1zM12 6h1v1h-1zM14 6h1v1h-1zM16 6h1v1h-1zM18 6h1v1h-1zM20 6h1v1h-1zM22 6h1v1h-1zM23 6h1v1h-1zM24 6h1v1h-1zM25 6h1v1h-1zM26 6h1v1h-1zM27 6h1v1h-1zM28 6h1v1h-1zM8 7h1v1h-1zM9 7h1v1h-1zM10 7h1v1h-1zM13 7h1v1h-1zM15 7h1v1h-1zM19 7h1v1h-1zM20 7h1v1h-1zM0 8h1v1h-1zM2 8h1v1h-1zM3 8h1v1h-1zM4 8h1v1h-1zM5 8h1v1h-1zM6 8h1v1h-1zM10 8h1v1h-1zM11 8h1v1h-1zM12 8h1v1h-1zM14 8h1v1h-1zM15 8h1v1h-1zM19 8h1v1h-1zM22 8h1v1h-1zM23 8h1v1h-1zM24 8h1v1h-1zM25 8h1v1h-1zM26 8h1v1h-1zM0 9h1v1h-1zM1 9h1v1h-1zM4 9h1v1h-1zM9 9h1v1h-1zM10 9h1v1h-1zM11 9h1v1h-1zM12 9h1v1h-1zM15 9h1v1h-1zM16 9h1v1h-1zM17 9h1v1h-1zM19 9h1v1h-1zM20 9h1v1h-1zM22 9h1v1h-1zM23 9h1v1h-1zM24 9h1v1h-1zM28 9h1v1h-1zM1 10h1v1h-1zM2 10h1v1h-1zM4 10h1v1h-1zM5 10h1v1h-1zM6 10h1v1h-1zM10 10h1v1h-1zM12 10h1v1h-1zM15 10h1v1h-1zM16 10h1v1h-1zM18 10h1v1h-1zM20 10h1v1h-1zM21 10h1v1h-1zM23 10h1v1h-1zM24 10h1v1h-1zM0 11h1v1h-1zM1 11h1v1h-1zM3 11h1v1h-1zM5 11h1v1h-1zM8 11h1v1h-1zM9 11h1v1h-1zM10 11h1v1h-1zM11 11h1v1h-1zM14 11h1v1h-1zM16 11h1v1h-1zM19 11h1v1h-1zM20 11h1v1h-1zM22 11h1v1h-1zM23 11h1v1h-1zM25 11h1v1h-1zM27 11h1v1h-1zM3 12h1v1h-1zM6 12h1v1h-1zM7 12h1v1h-1zM8 12h1v1h-1zM12 12h1v1h-1zM15 12h1v1h-1zM16 12h1v1h-1zM21 12h1v1h-1zM25 12h1v1h-1zM26 12h1v1h-1zM0 13h1v1h-1zM1 13h1v1h-1zM2 13h1v1h-1zM4 13h1v1h-1zM7 13h1v1h-1zM10 13h1v1h-1zM13 13h1v1h-1zM14 13h1v1h-1zM19 13h1v1h-1zM20 13h1v1h-1zM21 13h1v1h-1zM22 13h1v1h-1zM23 13h1v1h-1zM24 13h1v1h-1zM28 13h1v1h-1zM0 14h1v1h-1zM2 14h1v1h-1zM5 14h1v1h-1zM6 14h1v1h-1zM9 14h1v1h-1zM11 14h1v1h-1zM13 14h1v1h-1zM14 14h1v1h-1zM15 14h1v1h-1zM16 14h1v1h-1zM22 14h1v1h-1zM25 14h1v1h-1zM26 14h1v1h-1zM1 15h1v1h-1zM7 15h1v1h-1zM8 15h1v1h-1zM9 15h1v1h-1zM12 15h1v1h-1zM13 15h1v1h-1zM15 15h1v1h-1zM18 15h1v1h-1zM19 15h1v1h-1zM21 15h1v1h-1zM22 15h1v1h-1zM24 15h1v1h-1zM27 15h1v1h-1zM1 16h1v1h-1zM2 16h1v1h-1zM3 16h1v1h-1zM4 16h1v1h-1zM5 16h1v1h-1zM6 16h1v1h-1zM10 16h1v1h-1zM11 16h1v1h-1zM12 16h1v1h-1zM14 16h1v1h-1zM16 16h1v1h-1zM17 16h1v1h-1zM19 16h1v1h-1zM20 16h1v1h-1zM23 16h1v1h-1zM25 16h1v1h-1zM26 16h1v1h-1zM0 17h1v1h-1zM1 17h1v1h-1zM2 17h1v1h-1zM3 17h1v1h-1zM4 17h1v1h-1zM5 17h1v1h-1zM9 17h1v1h-1zM10 17h1v1h-1zM11 17h1v1h-1zM12 17h1v1h-1zM15 17h1v1h-1zM16 17h1v1h-1zM18 17h1v1h-1zM20 17h1v1h-1zM21 17h1v1h-1zM22 17h1v1h-1zM23 17h1v1h-1zM24 17h1v1h-1zM26 17h1v1h-1zM28 17h1v1h-1zM0 18h1v1h-1zM3 18h1v1h-1zM4 18h1v1h-1zM6 18h1v1h-1zM7 18h1v1h-1zM9 18h1v1h-1zM10 18h1v1h-1zM11 18h1v1h-1zM12 18h1v1h-1zM15 18h1v1h-1zM16 18h1v1h-1zM18 18h1v1h-1zM20 18h1v1h-1zM23 18h1v1h-1zM26 18h1v1h-1zM0 19h1v1h-1zM2 19h1v1h-1zM7 19h1v1h-1zM9 19h1v1h-1zM10 19h1v1h-1zM11 19h1v1h-1zM14 19h1v1h-1zM16 19h1v1h-1zM19 19h1v1h-1zM20 19h1v1h-1zM22 19h1v1h-1zM23 19h1v1h-1zM27 19h1v1h-1zM0 20h1v1h-1zM2 20h1v1h-1zM6 20h1v1h-1zM8 20h1v1h-1zM10 20h1v1h-1zM12 20h1v1h-1zM15 20h1v1h-1zM17 20h1v1h-1zM19 20h1v1h-1zM20 20h1v1h-1zM21 20h1v1h-1zM22 20h1v1h-1zM23 20h1v1h-1zM24 20h1v1h-1zM26 20h1v1h-1zM27 20h1v1h-1zM28 20h1v1h-1zM8 21h1v1h-1zM9 21h1v1h-1zM10 21h1v1h-1zM12 21h1v1h-1zM13 21h1v1h-1zM14 21h1v1h-1zM15 21h1v1h-1zM16 21h1v1h-1zM20 21h1v1h-1zM24 21h1v1h-1zM25 21h1v1h-1zM26 21h1v1h-1zM27 21h1v1h-1zM28 21h1v1h-1zM0 22h1v1h-1zM1 22h1v1h-1zM2 22h1v1h-1zM3 22h1v1h-1zM4 22h1v1h-1zM5 22h1v1h-1zM6 22h1v1h-1zM9 22h1v1h-1zM11 22h1v1h-1zM13 22h1v1h-1zM14 22h1v1h-1zM15 22h1v1h-1zM19 22h1v1h-1zM20 22h1v1h-1zM22 22h1v1h-1zM24 22h1v1h-1zM25 22h1v1h-1zM26 22h1v1h-1zM0 23h1v1h-1zM6 23h1v1h-1zM8 23h1v1h-1zM10 23h1v1h-1zM12 23h1v1h-1zM13 23h1v1h-1zM16 23h1v1h-1zM20 23h1v1h-1zM24 23h1v1h-1zM28 23h1v1h-1zM0 24h1v1h-1zM2 24h1v1h-1zM3 24h1v1h-1zM4 24h1v1h-1zM6 24h1v1h-1zM8 24h1v1h-1zM9 24h1v1h-1zM10 24h1v1h-1zM12 24h1v1h-1zM14 24h1v1h-1zM15 24h1v1h-1zM16 24h1v1h-1zM17 24h1v1h-1zM20 24h1v1h-1zM21 24h1v1h-1zM22 24h1v1h-1zM23 24h1v1h-1zM24 24h1v1h-1zM26 24h1v1h-1zM27 24h1v1h-1zM0 25h1v1h-1zM2 25h1v1h-1zM3 25h1v1h-1zM4 25h1v1h-1zM6 25h1v1h-1zM8 25h1v1h-1zM10 25h1v1h-1zM16 25h1v1h-1zM18 25h1v1h-1zM19 25h1v1h-1zM25 25h1v1h-1zM26 25h1v1h-1zM27 25h1v1h-1zM28 25h1v1h-1zM0 26h1v1h-1zM2 26h1v1h-1zM3 26h1v1h-1zM4 26h1v1h-1zM6 26h1v1h-1zM8 26h1v1h-1zM11 26h1v1h-1zM12 26h1v1h-1zM15 26h1v1h-1zM16 26h1v1h-1zM19 26h1v1h-1zM21 26h1v1h-1zM22 26h1v1h-1zM23 26h1v1h-1zM24 26h1v1h-1zM25 26h1v1h-1zM26 26h1v1h-1zM27 26h1v1h-1zM0 27h1v1h-1zM6 27h1v1h-1zM9 27h1v1h-1zM12 27h1v1h-1zM16 27h1v1h-1zM20 27h1v1h-1zM22 27h1v1h-1zM25 27h1v1h-1zM27 27h1v1h-1zM0 28h1v1h-1zM1 28h1v1h-1zM2 28h1v1h-1zM3 28h1v1h-1zM4 28h1v1h-1zM5 28h1v1h-1zM6 28h1v1h-1zM8 28h1v1h-1zM10 28h1v1h-1zM11 28h1v1h-1zM14 28h1v1h-1zM17 28h1v1h-1zM19 28h1v1h-1zM21 28h1v1h-1zM23 28h1v1h-1zM24 28h1v1h-1zM26 28h1v1h-1z"}};
+const OPPS = [{"t":"سفير القيم في حيّك","s":"تنفّذ مع فريق صغير مبادرة قيمية قصيرة في حيّك","l":0,"d":"soc","p":1,"g":"a","c":0,"m":"EV"},{"t":"يد في الميدان","s":"خدمة مباشرة: تنظيف المساجد، إفطار صائم، خدمة ضيوف الرحمن","l":0,"d":"rel","p":1,"g":"a","c":0,"m":"PV"},{"t":"وجه الاستقبال","s":"أول من يقابل الحضور: ترحيب وإرشاد وتنظيم الدخول","l":0,"d":"admin","p":1,"g":"a","c":0,"m":"PS"},{"t":"نبض الفعالية","s":"تضبط إيقاع الفعالية خلف الكواليس: الوقت والفقرات واحتياجات الفريق","l":0,"d":"admin","p":1,"g":"a","c":1,"m":"ES"},{"t":"رفيق المستفيد","s":"ترافق مجموعة من الطلاب خلال البرنامج وتتابع مشاركتهم","l":0,"d":"edu","p":0,"g":"a","c":1,"m":"SV"},{"t":"صوت الميدان","s":"تزور المدارس والبيئات الشبابية وتجمع آراء المستفيدين","l":0,"d":"res","p":1,"g":"a","c":0,"m":"CU"},{"t":"عين على الأثر","s":"ترصد نتائج البرامج وترتّب بياناتها قبل التقارير","l":0,"d":"res","p":0,"g":"a","c":1,"m":"CU"},{"t":"منظّم المسابقات","s":"تدير مسابقات ثقافية وتحديات قصيرة للمستفيدين","l":0,"d":"cul","p":0,"g":"a","c":0,"m":"ES"},{"t":"كشّاف المتطوعين","s":"تبحث عن متطوعين جدد في محيطك وتدلّهم على فرص الجمعية","l":0,"d":"admin","p":1,"g":"a","c":1,"m":"ES"},{"t":"صانع الأجواء","s":"توثّق لحظات الفعالية بجوالك: صور سريعة ومقاطع قصيرة","l":0,"d":"media","p":1,"g":"a","c":0,"m":"PS"},{"t":"مرافق البرنامج الصيفي","s":"تنظّم مجموعات البرنامج وترافقهم في أنشطتهم اليومية","l":0,"d":"fun","p":1,"g":"a","c":1,"m":"PS"},{"t":"يد العون الإدارية","s":"مهام تنظيمية خفيفة في المقر: ترتيب ملفات وتجهيز قاعات","l":0,"d":"admin","p":0,"g":"a","c":0,"m":"CP"},{"t":"ساعد في اليوم الأول","s":"مبادرة استقبال الطلاب والمعلمين في أول يوم دراسي","l":0,"d":"edu","p":1,"g":"a","c":0,"m":"PV"},{"t":"همسة توعية","s":"تشارك في مبادرات التوعية الصحية في الأحياء والمدارس","l":0,"d":"health","p":1,"g":"a","c":0,"m":"UV"},{"t":"مساعد الحملة","s":"تنشر فرص الجمعية وبرامجها في مجموعاتك ومحيطك","l":0,"d":"media","p":1,"g":"a","c":0,"m":"CS"},{"t":"مساعد الورشة التدريبية","s":"تجهّز القاعة والمواد وتتابع حضور المتدربين","l":0,"d":"edu","p":0,"g":"a","c":0,"m":"PS"},{"t":"مساعد الدعم التقني","s":"تجهّز الأجهزة والعرض قبل اللقاءات وتتابعها أثناءها","l":0,"d":"it","p":0,"g":"a","c":0,"m":"CP"},{"t":"حارس الحي الأخضر","s":"تنظّم مع فريق مبادرة بيئية في حيّك: تشجير أو تقليل الهدر","l":0,"d":"env","p":1,"g":"a","c":0,"m":"EV"},{"t":"رفيق حلقة التحفيظ","s":"تساند مشرف الحلقة في متابعة الطلاب وتنظيم الحضور","l":0,"d":"rel","p":1,"g":"a","c":1,"m":"SV"},{"t":"منظّم السلامة","s":"تتابع مسارات الدخول والخروج وسلامة الحضور في الفعاليات","l":0,"d":"safety","p":1,"g":"a","c":0,"m":"PS"},{"t":"مساعد دوري مسارات","s":"تنظّم تسجيل اللاعبين ونتائج المباريات","l":0,"d":"sport","p":1,"g":"a","c":1,"m":"PS"},{"t":"يد في الورشة الفنية","s":"تجهّز خامات الورشة وتساعد المشاركين أثناء التنفيذ","l":0,"d":"art","p":0,"g":"a","c":0,"m":"PS"},{"t":"سفيرة القيم في مدرستك","s":"تقودين مبادرة قيمية قصيرة داخل مدرستك أو جامعتك","l":0,"d":"soc","p":1,"g":"f","c":0,"m":"EV"},{"t":"مضيفة نادي الفتيات","s":"تستقبلين المشاركات وتنظّمين جلسات النادي","l":0,"d":"fun","p":0,"g":"f","c":1,"m":"PS"},{"t":"رفيقة المسار الصيفي","s":"ترافقين مشاركات البرنامج الصيفي في أنشطتهن","l":0,"d":"fun","p":0,"g":"f","c":1,"m":"PS"},{"t":"عدسة مسارات","s":"تصوّر مبادرات الجمعية وتسلّم مادة جاهزة للنشر","l":1,"d":"media","p":1,"g":"a","c":1,"m":"PU"},{"t":"مونتير القصة القصيرة","s":"تحوّل مادة التصوير إلى مقاطع قصيرة تحكي أثر البرنامج","l":1,"d":"media","p":0,"g":"a","c":1,"m":"CP"},{"t":"ريشة الهوية","s":"تصمّم منشورات الفرص والبرامج بهوية الجمعية","l":1,"d":"art","p":0,"g":"a","c":1,"m":"CE"},{"t":"مقدّم المنصة","s":"تقدّم فعاليات الجمعية وتدير الحوار على المسرح","l":1,"d":"media","p":1,"g":"a","c":0,"m":"ES"},{"t":"قائد فريق تطوعي","s":"تقود فريقاً صغيراً في مبادرة قيمية من التخطيط إلى التسليم","l":1,"d":"soc","p":1,"g":"a","c":1,"m":"ES"},{"t":"مدرّب الأقران","s":"تقدّم ورشة مهارية قصيرة في مجال تتقنه","l":1,"d":"edu","p":0,"g":"a","c":0,"m":"EU"},{"t":"راوي القيم","s":"تعدّ وتقدّم لقاءً قيمياً لمجموعة من الشباب","l":1,"d":"cul","p":0,"g":"a","c":0,"m":"EV"},{"t":"مهندس الجداول","s":"تبني نماذج وجداول عمل تسهّل متابعة البرامج","l":1,"d":"admin","p":0,"g":"a","c":0,"m":"CU"},{"t":"صوت الجمعية الرقمي","s":"تكتب وتجدول محتوى حسابات الجمعية وتتابع تفاعله","l":1,"d":"media","p":1,"g":"a","c":1,"m":"CE"},{"t":"جسر الشراكات","s":"تتواصل مع الجهات والداعمين لتأمين احتياجات البرامج","l":1,"d":"admin","p":1,"g":"a","c":1,"m":"CS"},{"t":"محرّر النصوص","s":"تدقّق لغوياً مواد الجمعية قبل نشرها","l":1,"d":"cul","p":0,"g":"a","c":0,"m":"CP"},{"t":"منسّق دوري مسارات","s":"تنظّم مباريات الدوري الرياضي وجداوله ونتائجه","l":1,"d":"sport","p":1,"g":"a","c":1,"m":"ES"},{"t":"أمين البيانات","s":"تدخل بيانات البرامج وتضبط دقتها في أنظمة الجمعية","l":1,"d":"it","p":0,"g":"a","c":1,"m":"CP"},{"t":"منسّق الأرشيف","s":"ترتّب وثائق البرامج وصورها في أرشيف منظّم","l":1,"d":"admin","p":0,"g":"a","c":1,"m":"CP"},{"t":"مصمّم المبادرات القيمية","s":"تحوّل القيمة إلى نشاط عملي يُنفّذ في المدارس والأحياء","l":1,"d":"soc","p":1,"g":"a","c":1,"m":"UV"},{"t":"رفيق الطريق","s":"ترافق مجموعة صغيرة بالإرشاد والمتابعة طوال البرنامج","l":1,"d":"edu","p":0,"g":"a","c":1,"m":"PV"},{"t":"مرآة الفريق","s":"تجمع ملاحظات المتطوعين بعد كل مبادرة وتلخّصها للفريق","l":1,"d":"admin","p":0,"g":"a","c":0,"m":"SU"},{"t":"سفير الاستدامة","s":"تصمّم حملة لترشيد الاستهلاك داخل برامج الجمعية وتنفّذها","l":1,"d":"env","p":1,"g":"a","c":1,"m":"UV"},{"t":"منسّق المبادرات الرمضانية","s":"تخطّط مبادرات رمضان وتوزّع أدوار الفريق عليها","l":1,"d":"rel","p":1,"g":"a","c":0,"m":"SV"},{"t":"ميسّر لقاء التوعية الصحية","s":"تقدّم لقاءً توعوياً عن عادة صحية للشباب","l":1,"d":"health","p":1,"g":"a","c":0,"m":"EV"},{"t":"منشّط الفعاليات","s":"تدير الألعاب والفقرات التفاعلية في البرامج الشبابية","l":1,"d":"fun","p":1,"g":"a","c":0,"m":"ES"},{"t":"مساعد قانوني","s":"ترتّب العقود والاتفاقيات وتتابع تواريخها","l":1,"d":"law","p":0,"g":"a","c":1,"m":"CU"},{"t":"مُيسّرة ورش الفنون","s":"تقدّمين ورشة فنية أو يدوية لمشاركات النادي","l":1,"d":"art","p":0,"g":"f","c":0,"m":"EP"},{"t":"باريستا النادي","s":"تجهّزين ركن الضيافة في برامج الفتيات","l":1,"d":"fun","p":0,"g":"f","c":0,"m":"PS"},{"t":"مرافقة المسار البحثي","s":"تساعدين المشاركات في ترتيب أبحاثهن وملصقاتهن العلمية","l":1,"d":"res","p":0,"g":"f","c":1,"m":"EU"},{"t":"مصمّمة الملصق العلمي","s":"تحوّلين نتائج البحث إلى ملصق علمي واضح","l":1,"d":"art","p":0,"g":"f","c":0,"m":"CU"},{"t":"مستشار الأثر","s":"تساعد الجمعية في قياس أثر برامجها وبناء مؤشراتها","l":2,"d":"res","p":0,"g":"a","c":1,"m":"CU"},{"t":"مدرّب معتمد","s":"تقدّم برنامجاً تدريبياً متكاملاً لمستفيدي الجمعية أو فريقها","l":2,"d":"edu","p":0,"g":"a","c":0,"m":"CE"},{"t":"مرشد الشباب","s":"تقدّم جلسات إرشادية فردية أو جماعية للشباب","l":2,"d":"soc","p":1,"g":"a","c":1,"m":"EV"},{"t":"عقل مالي","s":"تراجع الملفات المالية وتساعد في الإغلاقات الدورية","l":2,"d":"admin","p":0,"g":"a","c":1,"m":"CP"},{"t":"مستشار قانوني","s":"تراجع العقود والاتفاقيات وتقدّم الرأي القانوني","l":2,"d":"law","p":0,"g":"a","c":0,"m":"CV"},{"t":"مهندس الحلول الرقمية","s":"تبني لوحات بيانات وأدوات رقمية تخدم عمل الجمعية","l":2,"d":"it","p":0,"g":"a","c":1,"m":"CU"},{"t":"صانع الحملة","s":"تخطّط حملة تسويقية متكاملة لأحد برامج الجمعية","l":2,"d":"media","p":1,"g":"a","c":1,"m":"CE"},{"t":"مستشار الاتصال","s":"تبني رسائل الجمعية الإعلامية وخطة ظهورها","l":2,"d":"media","p":0,"g":"a","c":1,"m":"CE"},{"t":"معدّ الحقائب التدريبية","s":"تصمّم حقيبة تدريبية كاملة بأدلتها وأنشطتها","l":2,"d":"edu","p":0,"g":"a","c":1,"m":"CU"},{"t":"مستشار الجودة","s":"تراجع إجراءات الجمعية وتساعد في تطبيق معايير الجودة","l":2,"d":"admin","p":0,"g":"a","c":1,"m":"CP"},{"t":"مهندس تجربة المتطوع","s":"تصمّم مسار المتطوع من الاستقطاب إلى التحفيز والاستدامة","l":2,"d":"admin","p":0,"g":"a","c":1,"m":"ES"},{"t":"قائد شراكة مدرسية","s":"تبني شراكة مع مدرسة وتقود فريقاً لتنفيذ برنامج قيمي فيها","l":2,"d":"edu","p":1,"g":"a","c":1,"m":"ESV"},{"t":"مدير فعالية كبرى","s":"تخطّط وتدير فعالية كاملة من التصميم إلى التقييم","l":2,"d":"admin","p":1,"g":"a","c":1,"m":"CES"},{"t":"مستشار السلامة","s":"تضع خطة سلامة لفعاليات الجمعية وتدرّب الفريق عليها","l":2,"d":"safety","p":0,"g":"a","c":0,"m":"CP"},{"t":"مدرّب رياضي","s":"تدرّب فريقاً شبابياً ضمن برامج الجمعية الرياضية","l":2,"d":"sport","p":1,"g":"a","c":1,"m":"EV"},{"t":"مستشار صحي","s":"تقدّم لقاءات ومشورة صحية للشباب وأسرهم","l":2,"d":"health","p":0,"g":"a","c":0,"m":"CV"},{"t":"خبيرة البحث العلمي","s":"تشرفين على المسار البحثي للفتيات من الفكرة إلى النشر","l":2,"d":"res","p":0,"g":"f","c":1,"m":"CU"},{"t":"مرشدة المعلمات الجدد","s":"ترافقين معلمات حديثات التوظيف في أول سنة ميدانية","l":2,"d":"edu","p":0,"g":"f","c":1,"m":"EV"},{"t":"مستشارة التقنية والذكاء الاصطناعي","s":"تقدّمين لقاءات ومشورة تقنية لمشاركات البرامج","l":2,"d":"it","p":0,"g":"f","c":0,"m":"CU"},{"t":"ميسّرة الحوار القيمي","s":"تقدّمين لقاءات قيمية ثقافية لبرامج الفتيات","l":2,"d":"cul","p":0,"g":"f","c":1,"m":"EV"}];
+const EVENT_DAY = "2026-12-05";
+
+/* ---------- scoring and matching ---------- */
+function scoreAnswers(a){                 // a: 18 answers (1-5) in canonical order
+  const s = {};
+  DIMS.forEach((d,i)=>{ s[d] = a[i*3]+a[i*3+1]+a[i*3+2]; });
+  const rank = DIMS.slice().sort((x,y)=> s[y]-s[x] || DIMS.indexOf(x)-DIMS.indexOf(y));
+  const pct = {}; DIMS.forEach(d=>{ pct[d] = Math.round((s[d]-3)/12*100); });
+  const emerging = s[rank[0]] <= 8;
+  const dual = !emerging && (s[rank[0]] - s[rank[1]] <= 1);
+  return {s, pct, top:rank[0], second:rank[1], dual, emerging};
+}
+function matchRoles(r, p){                // r: scoring result, p: {g,lvl,dom[],place,time}
+  const pool = OPPS.map((o,i)=>{
+    if(p.g==="m" && o.g==="f") return null;
+    if(o.l > p.lvl) return null;
+    let v = o.l===p.lvl ? 2 : 0.5;
+    if(r.emerging){ if(o.c===0) v+=3; if(o.m.indexOf("P")>=0) v+=1; }
+    else { if(o.m.indexOf(r.top)>=0) v+=3; if(o.m.indexOf(r.second)>=0) v+= r.dual?2.5:1; }
+    if(p.g==="f" && o.g==="f") v+=1;
+    if(p.dom.indexOf(o.d)>=0) v+=2.5;
+    if((p.place==="in"&&o.p===0)||(p.place==="out"&&o.p===1)) v+=1;
+    if(p.time==="low"||p.time==="season") v += o.c===0 ? 1 : -1;
+    else if(p.time==="high") v += o.c===1 ? 1 : -0.5;
+    return {o,i,v};
+  }).filter(Boolean);
+  const picked = [];
+  while(picked.length<3 && pool.length){
+    pool.forEach(c=>{ c.w = c.v - 1.5*picked.filter(x=>x.o.d===c.o.d).length; });
+    pool.sort((x,y)=> y.w-x.w || x.i-y.i);
+    picked.push(pool.shift());
+  }
+  return picked.map(c=>c.i);
+}
+const emptyFields = dom => dom.filter(d=> !OPPS.some(o=>o.d===d));
+
+/* ---------- state ---------- */
+const fresh = ()=>({step:"welcome", qi:0, a:Array(18).fill(0), g:null, age:null, exp:null, lvl:null, dom:[],
+                    place:null, time:null, nm:"", ph:"", t0:0, rid:null});
+let S = fresh();
+const app = document.getElementById("app"), shelfEl = document.getElementById("shelf"), restartBtn = document.getElementById("restart");
+const esc = s => String(s).replace(/[&<>"]/g, c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const lab = (k,v)=>{ const o = Q[k].opts.find(o=>o[0]===v); return o?o[1]:""; };
+/* "" = left empty, null = not a Saudi mobile number, otherwise 05xxxxxxxx */
+function normPhone(v){
+  let d = String(v==null?"":v).replace(/[^0-9]/g,"");
+  if(!d) return "";
+  if(d.indexOf("00966")===0) d=d.slice(5); else if(d.indexOf("966")===0) d=d.slice(3);
+  if(d.charAt(0)==="0") d=d.slice(1);
+  return /^5[0-9]{8}$/.test(d) ? "0"+d : null;
+}
+
+/* ---------- storage: booth devices signed in with the association's account ---------- */
+let db=null, user=null, downloads=null, canEdit=false, capsReady=false, writeRefused=false, flushing=false;
+const LS = { get(k,d){ try{ const v=localStorage.getItem(k); return v==null?d:JSON.parse(v);}catch(e){return d;} },
+             set(k,v){ try{ localStorage.setItem(k,JSON.stringify(v)); }catch(e){} } };
+const deviceId = ()=>{ let d=LS.get("bt_dev",null); if(!d){ d=Math.random().toString(36).slice(2,8); LS.set("bt_dev",d);} return d; };
+const pending = ()=> LS.get("bt_pending",[]);
+const recording = ()=> !writeRefused && (canEdit || LS.get("bt_staff",false));
+function enqueue(rec){ if(!recording()) return false; const q=pending(); q.push(rec); LS.set("bt_pending",q); return true; }
+async function flush(){
+  if(!db || flushing || writeRefused) return; flushing=true;
+  try{
+    let q = pending();
+    while(q.length){
+      const rec = q[0];
+      try{ await db.collection("responses").doc(rec.id).set(rec); }
+      catch(e){ if(e && e.code==="invalid_argument"){ writeRefused=true; LS.set("bt_pending",[]); LS.set("bt_staff",false); } break; }
+      LS.set("bt_staff",true);
+      q = pending().filter(x=>x.id!==rec.id); LS.set("bt_pending",q);
+    }
+  } finally { flushing=false; renderShelf(); }
+}
+function renderShelf(){
+  const n = pending().length;
+  if(!(canEdit || n)){ shelfEl.hidden=true; return; }
+  shelfEl.hidden=false;
+  shelfEl.innerHTML = (canEdit && !writeRefused
+      ? `<span><span class="live${n?" hold":""}"></span>${n?`بانتظار الاتصال لحفظ ${n} إجابة`:"هذا الجهاز يحفظ الإجابات للتقرير"}</span>`
+      : `<span><span class="live hold"></span>${n} إجابة محفوظة على الجهاز بانتظار الاتصال</span>`)
+    + (canEdit ? `<button type="button" id="openReport">عرض التقرير</button>` : "");
+  const b = document.getElementById("openReport"); if(b) b.onclick = ()=>{ location.hash = "report"; };
+}
+const use = n => (window.claude && typeof window.claude.use==="function") ? window.claude.use(n).catch(()=>null) : Promise.resolve(null);
+(async ()=>{
+  const got = await Promise.all([use("db"),use("user"),use("downloads")]);
+  db=got[0]; user=got[1]; downloads=got[2];
+  try{ canEdit = !!(user && await user.canEdit()); }catch(e){ canEdit=false; }
+  capsReady=true; renderShelf(); flush();
+  if(location.hash==="#report") render();
+})();
+window.addEventListener("online", flush);
+setInterval(()=>{ if(pending().length) flush(); }, 60000);
+
+/* ---------- the compass ---------- */
+function rose(pct, top, dark, second){
+  const R=100, pts=[], lbl=[], ax=[];
+  const P=(i,r)=>{ const a=(-90+i*60)*Math.PI/180; return [ +(r*Math.cos(a)).toFixed(1), +(r*Math.sin(a)).toFixed(1) ]; };
+  const grid = dark?"rgba(255,255,255,.22)":"#cbd9e2", ink = dark?"#fff":"#0e2a3c", quiet = dark?"#9db9c9":"#55606a";
+  let rings="";
+  [1/3,2/3,1].forEach(f=>{ rings += `<polygon points="${DIMS.map((d,i)=>P(i,R*f).join(",")).join(" ")}" fill="none" stroke="${grid}" stroke-width="1"/>`; });
+  DIMS.forEach((d,i)=>{
+    const [x,y]=P(i,R); ax.push(`<line x1="0" y1="0" x2="${x}" y2="${y}" stroke="${grid}" stroke-width="1"/>`);
+    if(pct) pts.push(P(i,R*Math.max(pct[d],6)/100).join(","));
+    const [lx,ly]=P(i,R+16), side = Math.abs(lx)<5?"middle":(lx>0?"end":"start");
+    const dy = i===0?-16:(i===3?14:0), hot = pct && (d===top || d===second);
+    lbl.push(`<text x="${lx}" y="${ly+dy}" text-anchor="${side}" direction="rtl" font-family="Changa, sans-serif" font-size="14.5" font-weight="${hot?700:600}" fill="${hot?"#f3ab0d":ink}">${TYPES[d].name}</text>`
+      + (pct?`<text x="${lx}" y="${ly+dy+17}" text-anchor="${side}" direction="rtl" font-size="12.5" font-weight="300" fill="${quiet}" font-family="Readex Pro, sans-serif">${pct[d]}%</text>`:""));
+  });
+  const shape = pct ? `<polygon points="${pts.join(" ")}" fill="#f3ab0d" fill-opacity=".26" stroke="#f3ab0d" stroke-width="2.5" stroke-linejoin="round"/>` : "";
+  const needle = `<g class="needle" id="needle" style="transform:rotate(${pct?-150:-40}deg)"><polygon points="0,-78 9,0 0,14 -9,0" fill="#f3ab0d"/><polygon points="0,-78 0,14 -9,0" fill="#cf9105"/></g><circle r="5" fill="${dark?"#0e2a3c":"#fff"}" stroke="${dark?"#fff":"#0e2a3c"}" stroke-width="2"/>`;
+  const alt = pct ? "مخطط الأبعاد الستة: " + DIMS.map(d=>`${TYPES[d].name} ${pct[d]} بالمئة`).join("، ") : "بوصلة الأنماط التطوعية الستة";
+  return `<svg class="rose" viewBox="-205 -150 410 300" role="img" aria-label="${alt}">${rings}${ax.join("")}${shape}${needle}${lbl.join("")}</svg>`;
+}
+function swing(deg){ const n=document.getElementById("needle"); if(!n) return;
+  requestAnimationFrame(()=>requestAnimationFrame(()=>{ n.style.transform=`rotate(${deg}deg)`; })); }
+
+/* ---------- screens ---------- */
+function trail(){
+  const at = [0, 33.33, 66.67];
+  const parts = [
+    {n:"عنك", c:["g","age","exp"].filter(k=>S[k]).length/3},
+    {n:"دوافعك", c:S.a.filter(v=>v>0).length/18},
+    {n:"تفضيلاتك", c:((S.lvl!==null?1:0)+(S.dom.length?1:0)+(S.place?1:0)+(S.time?1:0))/4}
+  ];
+  const fill = (parts[0].c+parts[1].c+parts[2].c)/3*100;
+  const cur = S.step==="a"?0:S.step==="b"?1:2;
+  const dots = parts.map((p,i)=>{
+    const cls = p.c===1 ? "done" : i===cur ? "now" : "";
+    const pos = i===0 ? "right:0" : `right:calc(${at[i]}% - 6px)`;
+    return `<b class="${cls}" style="${pos}"></b>`;
+  }).join("");
+  const names = parts.map((p,i)=>{
+    const pos = i===0 ? "right:0" : `right:${at[i]}%;transform:translateX(50%)`;
+    return `<span class="name${i===cur?" on":""}" style="${pos}">${p.n}</span>`;
+  }).join("");
+  return `<div class="trail" aria-hidden="true"><div class="rail"><i style="width:${fill.toFixed(1)}%"></i></div>${dots}${names}</div>`;
+}
+function picks(key, multi){
+  const cur = S[key];
+  return Q[key].opts.map(o=>{
+    const on = multi ? cur.indexOf(o[0])>=0 : cur===o[0];
+    const full = multi && !on && cur.length>=3 ? ` aria-disabled="true"` : "";
+    return `<button type="button" data-k="${key}" data-v="${esc(o[0])}" aria-pressed="${on}"${full}>${esc(o[1])}${o[2]?`<small>${esc(o[2])}</small>`:""}</button>`;
+  }).join("");
+}
+function welcome(){
+  app.innerHTML = `<section class="hero">
+    <div class="who"><svg role="img" aria-label="جمعية مسارات الشبابية"><use href="#masarat-mark"/></svg>
+      <span>جمعية مسارات الشبابية</span></div>
+    <h1>ما الذي يحرّكك للتطوع؟</h1>
+    <p>خمسة وعشرون سؤالاً في أربع دقائق، تكشف دافعك للتطوع والأدوار التي تشبهك.</p>
+    ${rose(null,null,true)}
+    <button class="go" id="start" type="button">ابدأ المقياس</button>
+    <p class="where">ركن جمعية مسارات الشبابية في ملتقى اليوم العالمي للتطوع، 5 ديسمبر 2026، بالشراكة مع مركز التنمية بجدة.</p>
+  </section>`;
+  document.getElementById("start").onclick = ()=>{ S=fresh(); S.step="a"; S.t0=Date.now(); render(); };
+  swing(0);
+}
+function partA(){
+  const ok = S.g && S.age && S.exp;
+  app.innerHTML = trail() + `<section class="screen">
+    <h2>لنتعرف عليك أولاً</h2><p class="lead">ثلاثة أسئلة سريعة. لا توجد إجابة صحيحة أو خاطئة في هذا المقياس.</p>
+    ${["g","age","exp"].map(k=>`<fieldset><legend>${Q[k].label}</legend><div class="pick">${picks(k)}</div></fieldset>`).join("")}
+    <div class="nav"><button class="back" type="button" id="back">رجوع</button>
+      <button class="next" type="button" id="next" ${ok?"":"disabled"}>ابدأ العبارات</button></div>
+  </section>`;
+  document.getElementById("back").onclick = ()=>{ S.step="welcome"; render(); };
+  document.getElementById("next").onclick = ()=>{ S.step="b"; S.qi=0; render(); };
+}
+function partB(){
+  const idx = ORDER[S.qi], cur = S.a[idx];
+  app.innerHTML = trail() + `<section class="screen one">
+    <p class="count">العبارة ${S.qi+1} من 18</p>
+    <p class="statement" id="statement" tabindex="-1">${esc(ITEMS[idx])}</p>
+    <div class="dial">
+      <div class="stops" role="group" aria-labelledby="statement">
+        ${SCALE.map((s,i)=>`<button type="button" data-val="${i+1}" aria-pressed="${cur===i+1}" aria-label="${s}">${i+1}</button>`).join("")}
+      </div>
+      <div class="ends"><span>${SCALE[0]}</span><span>${SCALE[2]}</span><span>${SCALE[4]}</span></div>
+    </div>
+    <div class="nav"><button class="back" type="button" id="back">السابق</button>
+      ${cur?`<button class="next" type="button" id="fwd">التالي</button>`:"<span></span>"}</div>
+  </section>`;
+  let busy=false;
+  const go = ()=>{ if(busy) return; busy=true; if(S.qi<17){ S.qi++; } else { S.step="c"; } render(); };
+  app.querySelectorAll(".dial button").forEach(b=>{ b.onclick = ()=>{
+    S.a[idx] = +b.dataset.val;
+    app.querySelectorAll(".dial button").forEach(x=>x.setAttribute("aria-pressed", x===b));
+    setTimeout(go, 200);
+  };});
+  document.getElementById("back").onclick = ()=>{ if(S.qi>0){ S.qi--; } else { S.step="a"; } render(); };
+  const f = document.getElementById("fwd"); if(f) f.onclick = go;
+}
+function partC(){
+  const ok = S.lvl!==null && S.dom.length && S.place && S.time;
+  app.innerHTML = trail() + `<section class="screen">
+    <h2>بقي القليل: ما الذي يناسبك؟</h2>
+    <fieldset><legend>${Q.lvl.label}</legend><div class="pick rows">${picks("lvl")}</div></fieldset>
+    <fieldset><legend>${Q.dom.label} <em>اخترت ${S.dom.length} من 3</em></legend><div class="pick grid">${picks("dom",true)}</div></fieldset>
+    <fieldset><legend>${Q.place.label}</legend><div class="pick">${picks("place")}</div></fieldset>
+    <fieldset><legend>${Q.time.label}</legend><div class="pick">${picks("time")}</div></fieldset>
+    <div class="nav"><button class="back" type="button" id="back">السابق</button>
+      <button class="next lit" type="button" id="next" ${ok?"":"disabled"}>أظهر نتيجتي</button></div>
+  </section>`;
+  document.getElementById("back").onclick = ()=>{ S.step="b"; S.qi=17; render(); };
+  document.getElementById("next").onclick = ()=>{ if(recording()){ S.step="d"; render(); } else finish(); };
+}
+function partD(){
+  app.innerHTML = trail() + `<section class="screen">
+    <h2 id="dtitle" tabindex="-1">هل نبقى على تواصل؟</h2>
+    <p class="lead">اختياري تماماً. نتيجتك ستظهر لك سواء كتبت بياناتك أو تخطّيت هذه الخطوة.</p>
+    <div class="field"><label for="nm">الاسم</label>
+      <input id="nm" type="text" autocomplete="name" maxlength="60" value="${esc(S.nm)}" placeholder="اسمك كما تحب أن نناديك"></div>
+    <div class="field"><label for="ph">رقم الجوال</label>
+      <input id="ph" class="tel" type="tel" inputmode="tel" autocomplete="tel" maxlength="20" value="${esc(S.ph)}" placeholder="05XXXXXXXX">
+      <span class="bad" id="pherr" role="alert"></span></div>
+    <p class="consent">تستخدم جمعية مسارات الشبابية هذه البيانات للتواصل معك بشأن الفرص التطوعية فقط.</p>
+    <div class="nav"><button class="back" type="button" id="skip">تخطّي وإظهار النتيجة</button>
+      <button class="next lit" type="button" id="next">أظهر نتيجتي</button></div>
+  </section>`;
+  const nm=document.getElementById("nm"), ph=document.getElementById("ph"), err=document.getElementById("pherr");
+  const keep = ()=>{ S.nm=nm.value; S.ph=ph.value; };
+  nm.oninput = keep; ph.oninput = ()=>{ keep(); err.textContent=""; };
+  document.getElementById("skip").onclick = ()=>{ S.nm=""; S.ph=""; finish(); };
+  document.getElementById("next").onclick = ()=>{
+    keep();
+    if(normPhone(S.ph)===null){ err.textContent="تحقق من الرقم، أو اترك الحقل فارغاً."; ph.focus(); return; }
+    finish();
+  };
+}
+function finish(){
+  const r = scoreAnswers(S.a), p = {g:S.g,lvl:S.lvl,dom:S.dom,place:S.place,time:S.time};
+  const now = new Date(), roles = matchRoles(r,p);
+  const local = new Date(now.getTime()-now.getTimezoneOffset()*60000).toISOString();
+  S.rid = "r_"+now.getTime().toString(36)+"_"+Math.random().toString(36).slice(2,7);
+  enqueue({id:S.rid, v:2, ts:now.toISOString(), day:local.slice(0,10), hour:+local.slice(11,13), dev:deviceId(),
+    nm:(S.nm||"").trim().slice(0,60), ph:normPhone(S.ph)||"",
+    g:S.g, age:S.age, exp:S.exp, a:S.a.slice(), s:r.s, top:r.emerging?"N":r.top, second:r.second, dual:r.dual, emerging:r.emerging,
+    lvl:S.lvl, dom:S.dom.slice(), place:S.place, time:S.time, opp:roles.map(i=>OPPS[i].t),
+    dur:Math.round((Date.now()-S.t0)/1000)});
+  S.step="result"; render(); flush();
+}
+function qrSvg(k){
+  return `<svg viewBox="-2 -2 ${QR[k].n+4} ${QR[k].n+4}" role="img" aria-label="رمز للوصول إلى رابط التسجيل">
+    <rect x="-2" y="-2" width="${QR[k].n+4}" height="${QR[k].n+4}" fill="#fff"/><path d="${QR[k].d}" fill="#0e2a3c"/></svg>`;
+}
+function result(){
+  const r = scoreAnswers(S.a), p = {g:S.g,lvl:S.lvl,dom:S.dom,place:S.place,time:S.time};
+  const T = r.emerging ? EMERGING : TYPES[r.top], T2 = TYPES[r.second];
+  const head = r.emerging ? esc(T.name) : r.dual ? `${esc(T.name)} <span>و${esc(T2.name)}</span>` : esc(T.name);
+  const says = r.dual ? `${T.tag} ويقترب منه نمط ${T2.name}: ${T2.tag}` : T.tag;
+  const roles = matchRoles(r,p).map(i=>OPPS[i]);
+  const missing = emptyFields(S.dom);
+  const meta = o => `${LEVELS[o.l][0]} في مجال ${lab("dom",o.d)}، ${o.p?"في الميدان":"داخل المقر"}، ${o.c?"مشاركة ممتدة":"التزام خفيف"}`;
+  const row = (k,first,h,desc,btn)=>`<div class="row ${first?"first":"second"}"><div><h4>${h}</h4><p>${desc}</p>
+    <a href="${LINKS[k]}" target="_blank" rel="noopener">${btn}</a></div>${qrSvg(k)}</div>`;
+  const vol = row("vol", S.lvl<2, "انضم إلى متطوعي مسارات", "سجّل بياناتك لتصلك الفرص القادمة المناسبة لنتيجتك.", "تسجيل المتطوعين");
+  const pro = row("pro", S.lvl===2, "التطوع الاحترافي", "للخبراء وأصحاب التخصص الراغبين في التطوع بخبرتهم.", "تسجيل التطوع الاحترافي");
+  app.innerHTML = `<section class="result">
+    <div class="bearing">
+      <p class="lead">توجهك التطوعي</p>
+      <h2 id="rtitle" tabindex="-1">${head}</h2>
+      <p class="says">${esc(says)}</p>
+      ${rose(r.pct, r.emerging?null:r.top, true, r.dual?r.second:null)}
+      <div class="level"><b>${LEVELS[S.lvl][0]}</b><span>${LEVELS[S.lvl][1]}</span></div>
+    </div>
+    <div class="panel">
+      <div>
+        <h3>أدوار تشبهك</h3>
+        <p class="sub">أدوار مقترحة من مجالات عمل الجمعية، وليست إعلان فرص مفتوحة.</p>
+        <ul class="roles">${roles.map(o=>`<li><span class="t">${esc(o.t)}</span><span class="s">${esc(o.s)}</span><span class="meta">${esc(meta(o))}</span></li>`).join("")}</ul>
+        ${missing.length?`<p class="gap">لا تعمل الجمعية حالياً في ${missing.map(d=>"مجال "+lab("dom",d)).join(" و")}، فاخترنا لك أقرب الأدوار إلى دوافعك.</p>`:""}
+      </div>
+      <div class="tip"><h3>لتستمر في التطوع</h3><p>${esc(T.tip)}</p></div>
+      <div class="reg"><h3>الخطوة التالية</h3>${S.lvl===2?pro+vol:vol+pro}</div>
+    </div>
+    <div class="close"><svg role="img" aria-label="جمعية مسارات الشبابية"><use href="#masarat-logo"/></svg>
+      <button class="go quiet" type="button" id="again">مستجيب جديد</button></div>
+    <p class="fine">أداة إرشادية توعوية وليست تشخيصاً نفسياً. الأبعاد الستة مبنية على مقياس الوظائف التطوعية (VFI) لكلاري وزملائه 1998، ومستويات التطوع ومجالاته وفق اللائحة التنفيذية للعمل التطوعي والمنصة الوطنية للعمل التطوعي.</p>
+  </section>`;
+  document.getElementById("again").onclick = reset;
+  if(!r.emerging) swing(DIMS.indexOf(r.top)*60);
+}
+
+/* ---------- report, for the association's account ---------- */
+let R = {rows:null, err:null, scope:"all", from:"", to:""};
+const todayISO = ()=>{ const n=new Date(); return new Date(n.getTime()-n.getTimezoneOffset()*60000).toISOString().slice(0,10); };
+function inScope(r){
+  const d = r.day || "";
+  if(R.scope==="today") return d===todayISO();
+  if(R.scope==="event") return d===EVENT_DAY;
+  if(R.scope==="range") return (!R.from || d>=R.from) && (!R.to || d<=R.to);
+  return true;
+}
+function scopeLabel(){
+  if(R.scope==="today") return "اليوم "+todayISO();
+  if(R.scope==="event") return "يوم الملتقى "+EVENT_DAY;
+  if(R.scope==="range") return "الفترة من "+(R.from||"البداية")+" إلى "+(R.to||"اليوم");
+  return "كل الإجابات";
+}
+async function loadReport(){
+  R.err=null; R.rows=null; report();
+  try{
+    const snap = await Promise.race([ db.collection("responses").limit(1000).get(),
+      new Promise((_,j)=>setTimeout(()=>j({code:"timeout"}),10000)) ]);
+    R.rows = snap.docs.map(d=>d.data()).filter(Boolean);
+  }catch(e){ R.err = true; }
+  report();
+}
+function chart(title, pairs, total){
+  const max = Math.max(1,...pairs.map(p=>p[1]));
+  return `<div class="chart"><h3>${title}</h3>${pairs.map(([l,n,suffix])=>
+    `<div class="bar"><span>${esc(l)}</span><span class="track"><i style="width:${Math.round(n/max*100)}%"></i></span>
+     <span class="n">${suffix!==undefined?suffix:(n+(total?` (${Math.round(n/total*100)}%)`:""))}</span></div>`).join("")}</div>`;
+}
+const typeName = r => r.top==="N" ? EMERGING.name : ((TYPES[r.top]||{}).name||"");
+function reportMatrix(rows){
+  const head = ["المعرف","الوقت","اليوم","الجهاز","الاسم","الجوال","الجنس","العمر","الخبرة"]
+    .concat(ITEMS.map((_,i)=>"عبارة "+(i+1))).concat(DIMS.map(d=>TYPES[d].dim))
+    .concat(["النمط الأبرز","النمط الثاني","نمط مزدوج","توجه ناشئ","المستوى","المجالات","المكان","الوقت المتاح","الأدوار المقترحة","المدة بالثواني"]);
+  return [head].concat(rows.map(r=>[r.id,r.ts,r.day,r.dev,r.nm||"",r.ph||"",lab("g",r.g),lab("age",r.age),lab("exp",r.exp)]
+    .concat((r.a||[]).map(Number)).concat(DIMS.map(d=>Number((r.s||{})[d])))
+    .concat([typeName(r),(TYPES[r.second]||{}).name||"",r.dual?"نعم":"لا",r.emerging?"نعم":"لا",(LEVELS[r.lvl]||[])[0]||"",
+      (r.dom||[]).map(d=>lab("dom",d)).join(" | "),lab("place",r.place),lab("time",r.time),(r.opp||[]).join(" | "),Number(r.dur)])));
+}
+function contactMatrix(rows){
+  return [["الاسم","الجوال","اليوم","النمط الأبرز","المستوى","المجالات","الوقت المتاح"]]
+    .concat(rows.map(r=>[r.nm||"",r.ph||"",r.day,typeName(r),(LEVELS[r.lvl]||[])[0]||"",
+      (r.dom||[]).map(d=>lab("dom",d)).join(" | "),lab("time",r.time)]));
+}
+/* ---- xlsx: a stored zip of the five parts Excel needs, built here so the booth works offline ---- */
+const CRC = (()=>{ const t=new Uint32Array(256);
+  for(let i=0;i<256;i++){ let c=i; for(let k=0;k<8;k++) c = (c&1) ? (0xEDB88320 ^ (c>>>1)) : (c>>>1); t[i]=c>>>0; } return t; })();
+function crc32(b){ let c=0xFFFFFFFF; for(let i=0;i<b.length;i++) c = CRC[(c ^ b[i]) & 0xFF] ^ (c>>>8); return (c ^ 0xFFFFFFFF)>>>0; }
+function zip(files){
+  const enc=new TextEncoder(), parts=[], central=[]; let off=0;
+  const u16=n=>[n&255,(n>>8)&255], u32=n=>[n&255,(n>>8)&255,(n>>16)&255,(n>>>24)&255];
+  files.forEach(f=>{
+    const name=enc.encode(f.name), data=f.data, crc=crc32(data), n=data.length;
+    const lh=new Uint8Array([].concat(u32(0x04034b50),u16(20),u16(0),u16(0),u16(0),u16(0),u32(crc),u32(n),u32(n),u16(name.length),u16(0)));
+    parts.push(lh,name,data);
+    central.push(new Uint8Array([].concat(u32(0x02014b50),u16(20),u16(20),u16(0),u16(0),u16(0),u16(0),u32(crc),u32(n),u32(n),
+      u16(name.length),u16(0),u16(0),u16(0),u16(0),u32(0),u32(off))), name);
+    off += lh.length+name.length+n;
+  });
+  let cs=0; central.forEach(c=>{ cs+=c.length; });
+  const eocd=new Uint8Array([].concat(u32(0x06054b50),u16(0),u16(0),u16(files.length),u16(files.length),u32(cs),u32(off),u16(0)));
+  const all=parts.concat(central,[eocd]); let total=0; all.forEach(a=>{ total+=a.length; });
+  const out=new Uint8Array(total); let p=0; all.forEach(a=>{ out.set(a,p); p+=a.length; });
+  return out;
+}
+function xlsx(matrix, sheetName){
+  const enc=new TextEncoder();
+  const xe = s => String(s).replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F]/g,"")
+    .replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+  const col = n => { let s=""; n++; while(n>0){ const m=(n-1)%26; s=String.fromCharCode(65+m)+s; n=Math.floor((n-1)/26); } return s; };
+  let ncol=1; matrix.forEach(r=>{ ncol=Math.max(ncol,r.length); });
+  const body = matrix.map((r,i)=>`<row r="${i+1}">`+r.map((v,j)=>{
+      const ref=col(j)+(i+1);
+      if(typeof v==="number" && isFinite(v)) return `<c r="${ref}"><v>${v}</v></c>`;
+      const s = v==null ? "" : String(v);
+      return s ? `<c r="${ref}" t="inlineStr"><is><t xml:space="preserve">${xe(s)}</t></is></c>` : "";
+    }).join("")+`</row>`).join("");
+  const sheet = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>`
+    + `<worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">`
+    + `<sheetViews><sheetView rightToLeft="1" tabSelected="1" workbookViewId="0">`
+    + `<pane ySplit="1" topLeftCell="A2" activePane="bottomLeft" state="frozen"/></sheetView></sheetViews>`
+    + `<cols><col min="1" max="${ncol}" width="22" customWidth="1"/></cols><sheetData>${body}</sheetData></worksheet>`;
+  const book = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>`
+    + `<workbook xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships">`
+    + `<sheets><sheet name="${xe(sheetName)}" sheetId="1" r:id="rId1"/></sheets></workbook>`;
+  const F = (name,text)=>({name, data:enc.encode(text)});
+  return zip([
+    F("[Content_Types].xml", `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/><Override PartName="/xl/workbook.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/><Override PartName="/xl/worksheets/sheet1.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/></Types>`),
+    F("_rels/.rels", `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="xl/workbook.xml"/></Relationships>`),
+    F("xl/workbook.xml", book),
+    F("xl/_rels/workbook.xml.rels", `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet" Target="worksheets/sheet1.xml"/></Relationships>`),
+    F("xl/worksheets/sheet1.xml", sheet)
+  ]);
+}
+function toCsv(matrix){
+  const cell = v => `"${String(v==null?"":v).replace(/"/g,'""')}"`;
+  return "﻿"+matrix.map(r=>r.map(cell).join(",")).join("\r\n");
+}
+async function handOver(filename, data, el){
+  if(!downloads){ el.textContent="التنزيل غير متاح في هذا العرض. افتح الصفحة من claude.ai."; el.className="said warn"; return; }
+  el.className="said"; el.textContent="جارٍ التجهيز…";
+  try{ await downloads.save({filename, data}); el.textContent="تم حفظ "+filename; }
+  catch(e){ el.className="said warn";
+    el.textContent = e && e.code==="declined" ? "أُلغي التنزيل." : "تعذّر حفظ الملف من هذا العرض."; }
+}
+function report(){
+  restartBtn.hidden=false; restartBtn.textContent="العودة للمقياس";
+  let body;
+  if(!capsReady){ body = `<p class="said">جارٍ التحميل…</p>`; }
+  else if(!db || !canEdit){ body = `<p class="notice">التقرير متاح على جهاز مسجّل الدخول بحساب مالك الصفحة فقط.</p>`; }
+  else if(R.err){ body = `<p class="notice">تعذّر الوصول إلى الإجابات الآن. تحقق من الاتصال ثم اضغط تحديث.</p>
+      <div class="export"><div class="btns"><button type="button" id="refresh">تحديث</button></div></div>`; }
+  else if(!R.rows){ body = `<p class="said">جارٍ تحميل الإجابات…</p>`; }
+  else {
+    const rows = R.rows.filter(inScope), n = rows.length;
+    const tally = f => { const m={}; rows.forEach(r=>{ [].concat(f(r)).forEach(k=>{ m[k]=(m[k]||0)+1; }); }); return m; };
+    const byTop = tally(r=>r.top), avg = d => n ? Math.round(rows.reduce((t,r)=>t+(((r.s||{})[d]||3)-3)/12*100,0)/n) : 0;
+    const dist = k => { const m=tally(r=>r[k]); return Q[k].opts.map(o=>[o[1], m[o[0]]||0]); };
+    const contacts = rows.filter(r=>(r.nm||"")||(r.ph||"")), dur = n ? Math.round(rows.reduce((t,r)=>t+(r.dur||0),0)/n/6)/10 : 0;
+    const scopes = [["all","كل الإجابات"],["today","اليوم"],["event","يوم الملتقى"],["range","فترة محددة"]];
+    body = `<div class="scopes">${scopes.map(([v,l])=>`<button type="button" data-scope="${v}" aria-pressed="${R.scope===v}">${l}</button>`).join("")}</div>`
+      + (R.scope==="range" ? `<div class="range"><div class="field"><label for="from">من تاريخ</label>
+            <input id="from" type="date" value="${R.from}" max="${todayISO()}"></div>
+          <div class="field"><label for="to">إلى تاريخ</label><input id="to" type="date" value="${R.to}" max="${todayISO()}"></div></div>` : "")
+      + (n ? `<div class="tiles"><div class="tile"><b>${n}</b><span>إجابة مكتملة</span></div>
+            <div class="tile"><b>${contacts.length}</b><span>ترك بيانات تواصل</span></div>
+            <div class="tile"><b>${dur}</b><span>متوسط المدة بالدقائق</span></div>
+            <div class="tile"><b>${rows.filter(r=>r.dual).length}</b><span>نمط مزدوج</span></div></div>`
+        + chart("النمط الأبرز عند الزوار", DIMS.map(d=>[TYPES[d].name, byTop[d]||0]).concat([[EMERGING.name, byTop.N||0]]), n)
+        + chart("متوسط قوة كل دافع", DIMS.map(d=>[TYPES[d].name+" — "+TYPES[d].dim, avg(d), avg(d)+"%"]))
+        + chart("مستوى التطوع", LEVELS.map((l,i)=>[l[0], rows.filter(r=>r.lvl===i).length]), n)
+        + chart("المجالات المفضلة", dist("dom"), n) + chart("الجنس", dist("g"), n) + chart("الفئة العمرية", dist("age"), n)
+        + chart("الخبرة التطوعية", dist("exp"), n) + chart("مكان التطوع المفضل", dist("place"), n) + chart("الوقت المتاح", dist("time"), n)
+        : `<p class="notice">لا توجد إجابات في هذا النطاق بعد.</p>`)
+      + `<div class="export"><h3>التصدير</h3>
+          <p class="said">يشمل التصدير النطاق المحدد أعلاه: ${esc(scopeLabel())}، وعددها ${n} إجابة.</p>
+          <div class="btns">
+            <button type="button" id="xl" ${n?"":"disabled"}>ملف Excel</button>
+            <button type="button" id="xlc" ${contacts.length?"":"disabled"}>قائمة التواصل (${contacts.length})</button>
+            <button type="button" class="alt" id="csv" ${n?"":"disabled"}>CSV لجداول جوجل</button>
+            <button type="button" class="alt" id="refresh">تحديث</button>
+          </div><p class="said" id="msg"></p></div>`
+      + `<p class="said">تُسجَّل الإجابات على الأجهزة المسجّلة بحساب الجمعية فقط. من يفتح الرابط دون تسجيل دخول يرى نتيجته كاملة ولا تُسجَّل إجابته.</p>`;
+  }
+  app.innerHTML = `<section class="report"><h2>تقرير بوصلة التطوع</h2>${body}</section>`;
+  app.querySelectorAll("[data-scope]").forEach(b=>{ b.onclick=()=>{ R.scope=b.dataset.scope; report(); }; });
+  ["from","to"].forEach(k=>{ const el=document.getElementById(k); if(el) el.onchange=()=>{ R[k]=el.value; report(); }; });
+  const rf=document.getElementById("refresh"); if(rf) rf.onclick=loadReport;
+  const rows = R.rows ? R.rows.filter(inScope) : [], msg = document.getElementById("msg");
+  const stamp = R.scope==="range" ? (R.from||"start")+"_"+(R.to||todayISO()) : R.scope;
+  const xl=document.getElementById("xl");
+  if(xl) xl.onclick = ()=> handOver("volunteer-compass-"+stamp+".xlsx", new Blob([xlsx(reportMatrix(rows),"الإجابات")]), msg);
+  const xlc=document.getElementById("xlc");
+  if(xlc) xlc.onclick = ()=> handOver("volunteer-compass-contacts-"+stamp+".xlsx",
+    new Blob([xlsx(contactMatrix(rows.filter(r=>(r.nm||"")||(r.ph||""))),"التواصل")]), msg);
+  const cs=document.getElementById("csv");
+  if(cs) cs.onclick = ()=> handOver("volunteer-compass-"+stamp+".csv", toCsv(reportMatrix(rows)), msg);
+}
+
+/* ---------- shell ---------- */
+function reset(){ S=fresh(); render(); window.scrollTo(0,0); }
+function render(){
+  if(location.hash==="#report"){ document.body.dataset.screen="report";
+    if(db && canEdit && !R.rows && !R.err){ loadReport(); } else { report(); } return; }
+  document.body.dataset.screen = S.step;
+  restartBtn.textContent="البدء من جديد"; restartBtn.hidden = S.step==="welcome";
+  ({welcome:welcome,a:partA,b:partB,c:partC,d:partD,result:result})[S.step]();
+  if(S.step!=="welcome") window.scrollTo(0,0);
+  const f = document.getElementById(S.step==="b"?"statement":S.step==="result"?"rtitle":S.step==="d"?"dtitle":"");
+  if(f) f.focus({preventScroll:true});
+}
+restartBtn.onclick = ()=>{ if(location.hash==="#report"){ location.hash=""; R.rows=null; } reset(); };
+window.addEventListener("hashchange", ()=>{ R.rows=null; R.err=null; render(); });
+app.addEventListener("click", e=>{
+  const b = e.target.closest("[data-k]"); if(!b) return;
+  const k=b.dataset.k, raw=b.dataset.v, v = k==="lvl" ? +raw : raw;
+  if(k==="dom"){ const i=S.dom.indexOf(v); if(i>=0) S.dom.splice(i,1); else if(S.dom.length<3) S.dom.push(v); }
+  else S[k]=v;
+  const y = window.scrollY; render(); window.scrollTo(0,y);
+});
+document.addEventListener("keydown", e=>{
+  if(S.step==="b" && location.hash!=="#report" && e.key>="1" && e.key<="5"){
+    const b=app.querySelector(`.dial button[data-val="${e.key}"]`); if(b) b.click();
+  }
+});
+/* booth devices return to the opening screen after three idle minutes */
+let idle; const poke=()=>{ clearTimeout(idle); idle=setTimeout(()=>{ if(S.step!=="welcome" && location.hash!=="#report") reset(); },180000); };
+["pointerdown","keydown","scroll"].forEach(ev=>window.addEventListener(ev,poke,{passive:true})); poke();
+/* keep a respondent's place if the page is republished mid-answer */
+const start = d => { if(d && d.step){ S = Object.assign(fresh(), d); } render(); };
+const hot = window.claude && window.claude.hot;
+if(hot && hot.snapshot) hot.snapshot(()=>S);
+if(hot && hot.ready) hot.ready(start); else start((hot && hot.data) || {});
+</script>
+</body>
+</html>
